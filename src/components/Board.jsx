@@ -1,10 +1,9 @@
-import confetti from "canvas-confetti";
 import { useEffect, useState } from "react";
 import { Square } from "./Square";
 
-export const TURNS = {
-  X: "❌",
-  O: "⚪",
+export const TURN = {
+  X: Symbol("X"),
+  O: Symbol("O"),
 };
 
 const WINNING_COMBINATIONS = [
@@ -18,16 +17,31 @@ const WINNING_COMBINATIONS = [
   [2, 4, 6],
 ];
 
-export function Board({ onWinner, onDraw, changeTurn }) {
+let players;
+
+const PLAYERS_DEFAULTS = {
+  [TURN.X]: { managed: false },
+  [TURN.O]: { managed: false },
+};
+
+export function Board({ playersOpts, onWinner, onDraw, onChangeTurn }) {
   const [board, setBoard] = useState(Array(9).fill(null));
-  const [turn, setTurn] = useState(TURNS.X);
+  const [turn, setTurn] = useState(TURN.X);
   const [winner, setWinner] = useState(null);
   const [draw, setDraw] = useState(false);
 
   useEffect(() => {
-    if (turn) {
-      changeTurn(turn);
+    players = { ...PLAYERS_DEFAULTS, ...playersOpts };
+  }, [playersOpts]);
+
+  useEffect(() => {
+    if (players[turn].managed) {
+      simulateThinking(() => playManagedTurn(autoPlay()));
     }
+  }, [playersOpts, turn]);
+
+  useEffect(() => {
+    onChangeTurn(turn);
   }, [turn]);
 
   useEffect(() => {
@@ -42,6 +56,14 @@ export function Board({ onWinner, onDraw, changeTurn }) {
     }
   }, [draw]);
 
+  const playManagedTurn = playTurn;
+
+  function playUserControlledTurn(squareIndex) {
+    if (!players[turn].managed) {
+      playTurn(squareIndex);
+    }
+  }
+
   function playTurn(squareIndex) {
     if (board[squareIndex] || winner || draw) return;
 
@@ -49,11 +71,19 @@ export function Board({ onWinner, onDraw, changeTurn }) {
     newBoard[squareIndex] = turn;
     setBoard(newBoard);
 
-    const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X;
+    const newTurn = turn === TURN.X ? TURN.O : TURN.X;
     setTurn(newTurn);
 
     setWinner(findWinner(newBoard));
     setDraw(checkDraw(newBoard));
+  }
+
+  function autoPlay() {
+    return board.findIndex((square) => square === null);
+  }
+
+  function simulateThinking(action) {
+    setTimeout(action, 1000);
   }
 
   function checkDraw(boardToCheck) {
@@ -74,8 +104,8 @@ export function Board({ onWinner, onDraw, changeTurn }) {
   }
 
   return board.map((square, index) => (
-    <Square key={index} index={index} play={playTurn}>
-      {square}
+    <Square key={index} index={index} play={playUserControlledTurn}>
+      {square === TURN.X ? "x" : square === null ? "" : "o"}
     </Square>
   ));
 }
