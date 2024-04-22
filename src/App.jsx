@@ -3,18 +3,20 @@ import { useState } from "react";
 import "./App.css";
 import { Board, TURN } from "./components/Board";
 import { GameOverModal } from "./components/GameOverModal";
-import { Square } from "./components/Square";
+import Player from "./components/Player";
 
 const GAME_MODE = {
   ONE_P: {
-    [TURN.X]: { managed: false },
-    [TURN.O]: { managed: true },
+    [TURN.X]: { isManaged: false },
+    [TURN.O]: { isManaged: true },
   },
   TWO_P: {
-    [TURN.X]: { managed: false },
-    [TURN.O]: { managed: false },
+    [TURN.X]: { isManaged: false },
+    [TURN.O]: { isManaged: false },
   },
 };
+
+const ALL_SYMBOLS = ["😂", "😍", "😭", "🎨", "🥶"];
 
 function App() {
   const [winner, setWinner] = useState(null);
@@ -22,20 +24,50 @@ function App() {
   const [gameId, setGameId] = useState(1);
   const [turn, setTurn] = useState(null);
   const [gameMode, setGameMode] = useState(GAME_MODE.ONE_P);
+  const [playerSymbol, setPlayerSymbol] = useState({
+    [TURN.X]: ALL_SYMBOLS[0],
+    [TURN.O]: ALL_SYMBOLS[1],
+  });
+  const [playerName, setPlayerName] = useState({
+    [TURN.X]: "Jugador 1",
+    [TURN.O]: "Jugador 2",
+  });
 
-  function onWinner(square) {
+  function onWinner(winnerTurn) {
     confetti();
-    setWinner(square);
+    setWinner(winnerTurn);
   }
+
   function onDraw() {
     setDraw(true);
   }
+
   function resetGame() {
     const nextGame = gameId + 1;
     setGameId(nextGame);
     setWinner(null);
     setDraw(false);
   }
+
+  function changePlayerSymbol(turn, newSymbol) {
+    const newPlayerSymbol = { ...playerSymbol };
+    newPlayerSymbol[turn] = newSymbol;
+    setPlayerSymbol(newPlayerSymbol);
+  }
+
+  function changePlayerName(turn, newName) {
+    const newPlayerName = { ...playerName };
+    newPlayerName[turn] = newName;
+    setPlayerName(newPlayerName);
+  }
+
+  function players() {
+    const players = { ...gameMode };
+    players[TURN.X].symbol = playerSymbol[TURN.X];
+    players[TURN.O].symbol = playerSymbol[TURN.O];
+    return players;
+  }
+
   return (
     <main className="board">
       <h1>Tic tac toe</h1>
@@ -63,7 +95,7 @@ function App() {
       <section className="game">
         <Board
           key={gameId}
-          playersOpts={gameMode}
+          players={players()}
           onWinner={onWinner}
           onDraw={onDraw}
           onChangeTurn={setTurn}
@@ -71,12 +103,39 @@ function App() {
       </section>
 
       <section className="turn">
-        <Square isSelected={turn === TURN.X}>x</Square>
-        <Square isSelected={turn === TURN.O}>o</Square>
+        <Player
+          key={TURN.X.description}
+          allSymbols={ALL_SYMBOLS}
+          nonEligibleSymbols={[playerSymbol[TURN.O]]}
+          initialSymbol={playerSymbol[TURN.X]}
+          initialName={playerName[TURN.X]}
+          turn={TURN.X}
+          hasTurn={turn === TURN.X}
+          onChangeSymbol={changePlayerSymbol}
+          onChangeName={changePlayerName}
+        />
+        <Player
+          key={TURN.O.description}
+          allSymbols={ALL_SYMBOLS}
+          nonEligibleSymbols={[playerSymbol[TURN.X]]}
+          initialSymbol={playerSymbol[TURN.O]}
+          initialName={playerName[TURN.O]}
+          turn={TURN.O}
+          hasTurn={turn === TURN.O}
+          onChangeSymbol={changePlayerSymbol}
+          onChangeName={changePlayerName}
+        />
       </section>
 
       {winner || draw ? (
-        <GameOverModal winner={winner} isDraw={draw} resetGame={resetGame} />
+        <GameOverModal
+          winner={
+            winner
+              ? { symbol: playerSymbol[winner], name: playerName[winner] }
+              : null
+          }
+          resetGame={resetGame}
+        />
       ) : null}
     </main>
   );

@@ -17,28 +17,17 @@ const WINNING_COMBINATIONS = [
   [2, 4, 6],
 ];
 
-let players;
-
-const PLAYERS_DEFAULTS = {
-  [TURN.X]: { managed: false },
-  [TURN.O]: { managed: false },
-};
-
-export function Board({ playersOpts, onWinner, onDraw, onChangeTurn }) {
+export function Board({ players, onWinner, onDraw, onChangeTurn }) {
   const [board, setBoard] = useState(Array(9).fill(null));
   const [turn, setTurn] = useState(TURN.X);
   const [winner, setWinner] = useState(null);
   const [draw, setDraw] = useState(false);
 
   useEffect(() => {
-    players = { ...PLAYERS_DEFAULTS, ...playersOpts };
-  }, [playersOpts]);
-
-  useEffect(() => {
-    if (players[turn].managed) {
+    if (players[turn].isManaged) {
       simulateThinking(() => playManagedTurn(autoPlay()));
     }
-  }, [playersOpts, turn]);
+  }, [players, turn]);
 
   useEffect(() => {
     onChangeTurn(turn);
@@ -59,7 +48,7 @@ export function Board({ playersOpts, onWinner, onDraw, onChangeTurn }) {
   const playManagedTurn = playTurn;
 
   function playUserControlledTurn(squareIndex) {
-    if (!players[turn].managed) {
+    if (!players[turn].isManaged) {
       playTurn(squareIndex);
     }
   }
@@ -79,7 +68,7 @@ export function Board({ playersOpts, onWinner, onDraw, onChangeTurn }) {
   }
 
   function autoPlay() {
-    return board.findIndex((square) => square === null);
+    return board.findIndex((turnPlayed) => turnPlayed === null);
   }
 
   function simulateThinking(action) {
@@ -87,7 +76,7 @@ export function Board({ playersOpts, onWinner, onDraw, onChangeTurn }) {
   }
 
   function checkDraw(boardToCheck) {
-    return boardToCheck.every((square) => square !== null);
+    return boardToCheck.every((turnPlayed) => turnPlayed !== null);
   }
 
   function findWinner(boardToCheck) {
@@ -103,9 +92,9 @@ export function Board({ playersOpts, onWinner, onDraw, onChangeTurn }) {
     return null;
   }
 
-  return board.map((square, index) => (
+  return board.map((turnPlayed, index) => (
     <Square key={index} index={index} play={playUserControlledTurn}>
-      {square === TURN.X ? "x" : square === null ? "" : "o"}
+      {turnPlayed ? players[turnPlayed].symbol : null}
     </Square>
   ));
 }

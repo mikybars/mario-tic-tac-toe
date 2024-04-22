@@ -24,6 +24,13 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+  --square-size: 100px;
+  --gap-small: 10px;
+  --font-size-large: 32px;
+}
+
+#root {
+  max-width: 320px;
 }
 
 body {
@@ -53,7 +60,6 @@ body {
 
 .board button {
   padding: 8px 12px;
-  margin: 25px;
   background: transparent;
   border: 2px solid #eee;
   color: #eee;
@@ -77,11 +83,10 @@ body {
 
 .turn {
   display: flex;
+  flex-direction: column;
   justify-content: center;
-  margin: 15px auto;
-  width: fit-content;
-  position: relative;
-  border-radius: 10px;
+  gap: var(--gap-small);
+  margin-top: var(--gap-large);
 }
 
 .turn .square,
@@ -158,4 +163,59 @@ body {
 
 button.is-selected {
   background-color: tomato;
+}
+
+.player {
+  --size: calc(var(--square-size) * 0.7);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: var(--gap-small);
+
+  button {
+    width: var(--size);
+    height: var(--size);
+    padding: var(--gap-small);
+    font-size: var(--font-size-large);
+  }
+
+  &__name {
+    border: 2px solid var(--text-color);
+    height: var(--size);
+    text-align: center;
+    font-size: var(--font-size-large);
+    width: 0;
+    flex-grow: 1;
+  }
+
+  button {
+    width: var(--size);
+    height: var(--size);
+    padding: var(--gap-small);
+  }
+}
+
+.ui-list {
+  display: flex;
+  gap: var(--gap-small);
+  width: fit-content;
+
+  li {
+    list-style: none;
+  }
+}
+
+.symbol-list {
+  border: 2px solid black;
+  overflow-x: auto;
+
+  button {
+    border: none;
+    box-shadow: none;
+
+    &.is-disabled {
+      pointer-events: none;
+      opacity: 0.3;
+    }
+  }
 }
