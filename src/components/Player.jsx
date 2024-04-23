@@ -38,6 +38,8 @@ export default function Player({
       <input
         type="text"
         className="player__name"
+        autoCorrect="false"
+        autoComplete="false"
         value={name}
         onChange={(e) => setName(e.target.value)}
       />

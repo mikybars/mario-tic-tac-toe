@@ -1,0 +1,53 @@
+@use "mixins" as mx;
+
+.player {
+  --size: calc(var(--square-size) * 0.7);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: var(--gap-small);
+
+  button {
+    width: var(--size);
+    height: var(--size);
+    padding: var(--gap-small);
+
+    &.is-selected {
+      background-color: var(--harvest-gold);
+    }
+
+    &:hover {
+      background-color: var(--silvermist);
+    }
+  }
+
+  &__name {
+    color: var(--harvest-gold);
+    text-align: center;
+    font-size: var(--font-size-large);
+    height: var(--size);
+    outline-color: var(--frank-blue);
+    width: 0;
+    flex-grow: 1;
+  }
+
+  // &__symbol.is-disabled {
+  //   pointer-events: none;
+  //   opacity: 0.6;
+  // }
+}
+
+.symbol-list {
+  @include mx.border;
+  overflow-x: auto;
+
+  button {
+    border: none;
+    box-shadow: none;
+  }
+}
+
+.symbol-btn.is-disabled {
+  pointer-events: none;
+  opacity: 0.3;
+}

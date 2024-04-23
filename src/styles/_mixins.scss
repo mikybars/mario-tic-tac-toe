@@ -1,0 +1,5 @@
+@mixin border {
+  border-radius: 255px 15px 225px/15px 225px 15px 255px;
+  box-shadow: 15px 28px 25px -18px #0003;
+  border: 2px solid var(--text-color);
+}

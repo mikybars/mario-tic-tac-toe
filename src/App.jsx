@@ -1,10 +1,19 @@
 import confetti from "canvas-confetti";
+import clsx from "clsx";
 import { useState } from "react";
 import "./App.css";
+import logo from "./assets/logo.png";
+import Mario from "./assets/mario.svg?react";
+import Koopa from "./assets/koopa.svg?react";
+import Bowser from "./assets/bowser.svg?react";
+import Toad from "./assets/toad.svg?react";
+import Goomba from "./assets/goomba.svg?react";
+import Racoon from "./assets/racoon.svg?react";
+import Star from "./assets/star.svg?react";
+import Pirana from "./assets/pirana.svg?react";
 import { Board, TURN } from "./components/Board";
 import { GameOverModal } from "./components/GameOverModal";
 import Player from "./components/Player";
-import clsx from "clsx";
 
 const GAME_MODE = {
   ONE_P: {
@@ -17,7 +26,16 @@ const GAME_MODE = {
   },
 };
 
-const ALL_SYMBOLS = ["😂", "😍", "😭", "🎨", "🥶"];
+const PLAYER_SYMBOLS = [
+  <Mario />,
+  <Koopa />,
+  <Bowser />,
+  <Toad />,
+  <Goomba />,
+  <Racoon />,
+  <Star />,
+  <Pirana />,
+];
 
 function App() {
   const [winner, setWinner] = useState(null);
@@ -26,8 +44,8 @@ function App() {
   const [turn, setTurn] = useState(null);
   const [gameMode, setGameMode] = useState(GAME_MODE.ONE_P);
   const [playerSymbol, setPlayerSymbol] = useState({
-    [TURN.X]: ALL_SYMBOLS[0],
-    [TURN.O]: ALL_SYMBOLS[1],
+    [TURN.X]: PLAYER_SYMBOLS[0],
+    [TURN.O]: PLAYER_SYMBOLS[1],
   });
   const [playerName, setPlayerName] = useState({
     [TURN.X]: "Jugador 1",
@@ -70,13 +88,13 @@ function App() {
   }
 
   return (
-    <main className="board">
-      <h1>Tic tac toe</h1>
+    <main className="game">
+      <img src={logo} alt="Tic Tac Toe" />
 
       <section className="game-options">
         <button
           className={clsx(
-            "game-model-btn",
+            "game-mode-btn",
             gameMode === GAME_MODE.ONE_P && "is-selected",
           )}
           onClick={() => setGameMode(GAME_MODE.ONE_P)}
@@ -85,7 +103,7 @@ function App() {
         </button>
         <button
           className={clsx(
-            "game-model-btn",
+            "game-mode-btn",
             gameMode === GAME_MODE.TWO_P && "is-selected",
           )}
           onClick={() => {
@@ -99,7 +117,7 @@ function App() {
         </button>
       </section>
 
-      <section className="game">
+      <section className="board">
         <Board
           key={gameId}
           players={players()}
@@ -112,7 +130,7 @@ function App() {
       <section className="turn">
         <Player
           key={TURN.X.description}
-          allSymbols={ALL_SYMBOLS}
+          allSymbols={PLAYER_SYMBOLS}
           nonEligibleSymbols={[playerSymbol[TURN.O]]}
           initialSymbol={playerSymbol[TURN.X]}
           initialName={playerName[TURN.X]}
@@ -123,7 +141,7 @@ function App() {
         />
         <Player
           key={TURN.O.description}
-          allSymbols={ALL_SYMBOLS}
+          allSymbols={PLAYER_SYMBOLS}
           nonEligibleSymbols={[playerSymbol[TURN.X]]}
           initialSymbol={playerSymbol[TURN.O]}
           initialName={playerName[TURN.O]}

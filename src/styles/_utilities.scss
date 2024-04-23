@@ -1,0 +1,18 @@
+.ui-list {
+  display: flex;
+  gap: var(--gap-small);
+  width: fit-content;
+
+  li {
+    list-style: none;
+  }
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #000c;
+}

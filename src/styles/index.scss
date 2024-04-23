@@ -1,0 +1,129 @@
+@forward "game-options";
+@forward "board";
+@forward "player";
+@forward "game-over-modal";
+@forward "utilities";
+@use "mixins" as mx;
+
+:root {
+  --alabaster: #eeeae0;
+  --polished-mahogany: #6a0400;
+  --pickle: #83a169;
+  --heartthrob: #a52931;
+  --silvermist: #afb8b2;
+  --harvest-gold: #dfa36d;
+  --kingdom-gold: #d1a436;
+  --frank-blue: #26558a;
+  --arugula: #42603c;
+  --main-bg-color: var(--alabaster);
+  --text-color: var(--polished-mahogany);
+  --highlight-color1: var(--pickle);
+  --highlight-color2: var(--heartthrob);
+  --highlight-color3: var(--harvest-gold);
+  --highlight-color4: var(--frank-blue);
+  --highlight-color5: var(--arugula);
+  --gap-small: 10px;
+  --gap-medium: 20px;
+  --gap-large: 40px;
+  --square-size: 100px;
+  --font-size-large: 32px;
+  --font-size-medium: 20px;
+  --font-size-small: 16px;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    Segoe UI,
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    Open Sans,
+    Helvetica Neue,
+    sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  color-scheme: light dark;
+  color: var(--text-color);
+  background-color: var(--main-bg-color);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+@font-face {
+  font-family: DynaPuff;
+  src:
+    local("DynaPuff"),
+    url(../assets/DynaPuff_SemiCondensed-Bold.ttf) format("truetype");
+}
+
+#root {
+  max-width: 1280px;
+  max-width: 320px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+::selection {
+  background: var(--harvest-gold);
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  color: var(--text-color);
+  font-family: DynaPuff;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button {
+  padding: 8px 12px;
+  transition: 0.2s;
+  font-weight: 700;
+  cursor: default;
+
+  &.is-selected {
+    background: var(--highlight-color1);
+    color: var(--main-bg-color);
+  }
+}
+
+button,
+input[type="text"] {
+  @include mx.border;
+  background: var(--main-bg-color);
+}
+
+svg {
+  background: transparent;
+}
+
+.game {
+  margin: 40px auto;
+  text-align: center;
+}
+
+.not-editable {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.turn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--gap-small);
+  margin-top: var(--gap-large);
+}

@@ -1,0 +1,26 @@
+.game-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-small);
+  margin: var(--gap-medium) 0;
+
+  .game-mode-btn {
+    flex-grow: 1;
+    font-size: var(--font-size-medium);
+
+    &:hover:not(.is-selected) {
+      color: var(--main-bg-color);
+      background: var(--silvermist);
+    }
+  }
+
+  .game-reset-btn {
+    font-size: var(--font-size-small);
+    width: 100%;
+
+    &:hover {
+      color: var(--main-bg-color);
+      background: var(--highlight-color2);
+    }
+  }
+}

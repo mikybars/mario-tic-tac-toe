@@ -1,0 +1,19 @@
+@use "mixins" as mx;
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--gap-small);
+}
+
+.square {
+  @include mx.border;
+  width: var(--square-size);
+  height: var(--square-size);
+  place-items: center;
+  padding: var(--gap-small);
+
+  // &.is-winner {
+  //   background: var(--highlight-color4);
+  // }
+}
