@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { useEffect, useState } from "react";
 
 export default function Player({
@@ -29,7 +30,7 @@ export default function Player({
   return (
     <div className="player">
       <button
-        className={`player__symbol ${hasTurn ? "is-selected" : ""}`}
+        className={clsx("player__symbol", hasTurn && "is-selected")}
         onClick={toggleChoosingSymbol}
       >
         {symbol}
@@ -45,7 +46,10 @@ export default function Player({
           {allSymbols.map((symbol) => (
             <li key={symbol}>
               <button
-                className={`symbol-btn ${nonEligibleSymbols.includes(symbol) ? "is-disabled" : ""}`}
+                className={clsx(
+                  "symbol-btn",
+                  nonEligibleSymbols.includes(symbol) && "is-disabled",
+                )}
                 onClick={() => {
                   setSymbol(symbol);
                   toggleChoosingSymbol();

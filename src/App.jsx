@@ -4,6 +4,7 @@ import "./App.css";
 import { Board, TURN } from "./components/Board";
 import { GameOverModal } from "./components/GameOverModal";
 import Player from "./components/Player";
+import clsx from "clsx";
 
 const GAME_MODE = {
   ONE_P: {
@@ -74,13 +75,19 @@ function App() {
 
       <section className="game-options">
         <button
-          className={`game-mode-btn ${gameMode === GAME_MODE.ONE_P ? "is-selected" : ""}`}
+          className={clsx(
+            "game-model-btn",
+            gameMode === GAME_MODE.ONE_P && "is-selected",
+          )}
           onClick={() => setGameMode(GAME_MODE.ONE_P)}
         >
           1 jugador
         </button>
         <button
-          className={`game-mode-btn ${gameMode === GAME_MODE.TWO_P ? "is-selected" : ""}`}
+          className={clsx(
+            "game-model-btn",
+            gameMode === GAME_MODE.TWO_P && "is-selected",
+          )}
           onClick={() => {
             setGameMode(GAME_MODE.TWO_P);
           }}
