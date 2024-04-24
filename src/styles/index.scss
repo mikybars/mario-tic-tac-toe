@@ -98,12 +98,20 @@ button {
     background: var(--highlight-color1);
     color: var(--main-bg-color);
   }
+
+  &[disabled] {
+    @include mx.disabled;
+  }
 }
 
 button,
 input[type="text"] {
   @include mx.border;
   background: var(--main-bg-color);
+}
+
+input[type="text"][readonly] {
+  @include mx.disabled;
 }
 
 svg {
@@ -113,11 +121,6 @@ svg {
 .game {
   margin: 40px auto;
   text-align: center;
-}
-
-.not-editable {
-  cursor: default;
-  opacity: 0.6;
 }
 
 .turn {

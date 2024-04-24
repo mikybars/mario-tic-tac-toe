@@ -8,6 +8,7 @@ export default function Player({
   initialName,
   turn,
   hasTurn,
+  isEditable,
   onChangeSymbol,
   onChangeName,
 }) {
@@ -31,6 +32,7 @@ export default function Player({
     <div className="player">
       <button
         className={clsx("player__symbol", hasTurn && "is-selected")}
+        disabled={!isEditable}
         onClick={toggleChoosingSymbol}
       >
         {symbol}
@@ -41,6 +43,7 @@ export default function Player({
         autoCorrect="false"
         autoComplete="false"
         value={name}
+        readOnly={!isEditable}
         onChange={(e) => setName(e.target.value)}
       />
       {choosingSymbol ? (

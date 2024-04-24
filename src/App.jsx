@@ -136,6 +136,7 @@ function App() {
           initialName={playerName[TURN.X]}
           turn={TURN.X}
           hasTurn={turn === TURN.X}
+          isEditable={gameMode[TURN.X].isManaged === false}
           onChangeSymbol={changePlayerSymbol}
           onChangeName={changePlayerName}
         />
@@ -147,6 +148,7 @@ function App() {
           initialName={playerName[TURN.O]}
           turn={TURN.O}
           hasTurn={turn === TURN.O}
+          isEditable={gameMode[TURN.O].isManaged === false}
           onChangeSymbol={changePlayerSymbol}
           onChangeName={changePlayerName}
         />

@@ -3,3 +3,9 @@
   box-shadow: 15px 28px 25px -18px #0003;
   border: 2px solid var(--text-color);
 }
+
+@mixin disabled {
+  cursor: default;
+  pointer-events: none;
+  opacity: 0.6;
+}
