@@ -39,9 +39,11 @@ export default function Player({
       </button>
       <input
         type="text"
+        name="player-name"
         className="player__name"
         autoCorrect="false"
         autoComplete="false"
+        spellCheck="false"
         value={name}
         readOnly={!isEditable}
         onChange={(e) => setName(e.target.value)}
@@ -49,7 +51,7 @@ export default function Player({
       {choosingSymbol ? (
         <ul className="ui-list symbol-list">
           {allSymbols.map((symbol) => (
-            <li key={symbol}>
+            <li key={symbol.type.name}>
               <button
                 className={clsx(
                   "symbol-btn",

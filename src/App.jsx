@@ -1,6 +1,6 @@
 import confetti from "canvas-confetti";
 import clsx from "clsx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import logo from "./assets/logo.png";
 import Mario from "./assets/mario.svg?react";
@@ -51,6 +51,36 @@ function App() {
     [TURN.X]: "Jugador 1",
     [TURN.O]: "Jugador 2",
   });
+
+  useEffect(() => {
+    for (const turn of Object.getOwnPropertySymbols(gameMode)) {
+      if (gameMode[turn].isManaged) {
+        const randomSymbol = pickRandomSymbolExcluding([
+          playerSymbol[TURN.X],
+          playerSymbol[TURN.O],
+        ]);
+        changePlayerName(
+          turn,
+          extractFilenameFromReactSvgComponent(randomSymbol),
+        );
+        changePlayerSymbol(turn, randomSymbol);
+      }
+    }
+  }, [gameMode]);
+
+  function pickRandomSymbolExcluding(excludeSymbols) {
+    const randomSymbol =
+      PLAYER_SYMBOLS[Math.floor(Math.random() * PLAYER_SYMBOLS.length)];
+    if (!excludeSymbols.includes(randomSymbol)) {
+      return randomSymbol;
+    }
+    return pickRandomSymbolExcluding(excludeSymbols);
+  }
+
+  // awful hack
+  function extractFilenameFromReactSvgComponent(symbol) {
+    return symbol.type.name.replace(/^Svg/, "");
+  }
 
   function onWinner(winnerTurn) {
     confetti();
@@ -129,7 +159,7 @@ function App() {
 
       <section className="turn">
         <Player
-          key={TURN.X.description}
+          key={playerSymbol[TURN.X].type.name}
           allSymbols={PLAYER_SYMBOLS}
           nonEligibleSymbols={[playerSymbol[TURN.O]]}
           initialSymbol={playerSymbol[TURN.X]}
@@ -141,7 +171,7 @@ function App() {
           onChangeName={changePlayerName}
         />
         <Player
-          key={TURN.O.description}
+          key={playerSymbol[TURN.O].type.name}
           allSymbols={PLAYER_SYMBOLS}
           nonEligibleSymbols={[playerSymbol[TURN.X]]}
           initialSymbol={playerSymbol[TURN.O]}
