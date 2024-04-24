@@ -20,8 +20,8 @@ const WINNING_COMBINATIONS = [
 export function Board({ players, onWinner, onDraw, onChangeTurn }) {
   const [board, setBoard] = useState(Array(9).fill(null));
   const [turn, setTurn] = useState(TURN.X);
-  const [winner, setWinner] = useState(null);
   const [draw, setDraw] = useState(false);
+  const [winnerCombo, setWinnerCombo] = useState(null);
 
   useEffect(() => {
     if (players[turn].isManaged) {
@@ -34,18 +34,34 @@ export function Board({ players, onWinner, onDraw, onChangeTurn }) {
   }, [turn]);
 
   useEffect(() => {
-    if (winner) {
-      onWinner(winner);
-    }
-  }, [winner]);
-
-  useEffect(() => {
     if (draw) {
       onDraw();
     }
   }, [draw]);
 
+  useEffect(() => {
+    if (winnerCombo === null) {
+      return;
+    }
+    animateWinnerCombo();
+  }, [winnerCombo]);
+
   const playManagedTurn = playTurn;
+
+  function animateWinnerCombo() {
+    const firstNotHighlighted = winnerCombo.findIndex((w) => !w.isHighlighted);
+    setTimeout(() => {
+      if (firstNotHighlighted !== -1) {
+        const newWinnerCombo = [...winnerCombo];
+        newWinnerCombo[firstNotHighlighted].isHighlighted = true;
+        setWinnerCombo(newWinnerCombo);
+      } else {
+        // all squares are highlighted => notify winner
+        const winnerTurn = board[winnerCombo[0].index];
+        onWinner(winnerTurn);
+      }
+    }, 300);
+  }
 
   function playUserControlledTurn(squareIndex) {
     if (!players[turn].isManaged) {
@@ -54,7 +70,7 @@ export function Board({ players, onWinner, onDraw, onChangeTurn }) {
   }
 
   function playTurn(squareIndex) {
-    if (board[squareIndex] || winner || draw) return;
+    if (board[squareIndex] !== null || winnerCombo !== null || draw) return;
 
     const newBoard = [...board];
     newBoard[squareIndex] = turn;
@@ -63,8 +79,8 @@ export function Board({ players, onWinner, onDraw, onChangeTurn }) {
     const newTurn = turn === TURN.X ? TURN.O : TURN.X;
     setTurn(newTurn);
 
-    setWinner(findWinner(newBoard));
-    setDraw(checkDraw(newBoard));
+    checkWinner(newBoard);
+    checkDraw(newBoard);
   }
 
   function autoPlay() {
@@ -76,24 +92,34 @@ export function Board({ players, onWinner, onDraw, onChangeTurn }) {
   }
 
   function checkDraw(boardToCheck) {
-    return boardToCheck.every((turnPlayed) => turnPlayed !== null);
+    setDraw(boardToCheck.every((turnPlayed) => turnPlayed !== null));
   }
 
-  function findWinner(boardToCheck) {
+  function checkWinner(boardToCheck) {
     for (const [a, b, c] of WINNING_COMBINATIONS) {
       if (
         boardToCheck[a] &&
         boardToCheck[a] === boardToCheck[b] &&
         boardToCheck[a] === boardToCheck[c]
       ) {
-        return boardToCheck[a];
+        setWinnerCombo(
+          [a, b, c].map((w) => ({
+            index: w,
+          })),
+        );
       }
     }
-    return null;
   }
 
   return board.map((turnPlayed, index) => (
-    <Square key={index} index={index} play={playUserControlledTurn}>
+    <Square
+      key={index}
+      index={index}
+      play={playUserControlledTurn}
+      isWinner={winnerCombo?.some(
+        (w) => w?.index === index && w?.isHighlighted,
+      )}
+    >
       {turnPlayed ? players[turnPlayed].symbol : null}
     </Square>
   ));

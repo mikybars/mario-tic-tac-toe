@@ -13,7 +13,7 @@
   place-items: center;
   padding: var(--gap-small);
 
-  // &.is-winner {
-  //   background: var(--highlight-color4);
-  // }
+  &.is-winner {
+    background: var(--highlight-color4);
+  }
 }
