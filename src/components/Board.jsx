@@ -30,11 +30,13 @@ export function Board({ players, onWinner, onDraw, onChangeTurn }) {
   }, [players, turn]);
 
   useEffect(() => {
-    onChangeTurn(turn);
+    if (typeof onChangeTurn === "function") {
+      onChangeTurn(turn);
+    }
   }, [turn]);
 
   useEffect(() => {
-    if (draw) {
+    if (draw && typeof onDraw === "function") {
       onDraw();
     }
   }, [draw]);
@@ -55,7 +57,7 @@ export function Board({ players, onWinner, onDraw, onChangeTurn }) {
         const newWinnerCombo = [...winnerCombo];
         newWinnerCombo[firstNotHighlighted].isHighlighted = true;
         setWinnerCombo(newWinnerCombo);
-      } else {
+      } else if (typeof onWinner === "function") {
         // all squares are highlighted => notify winner
         const winnerTurn = board[winnerCombo[0].index];
         onWinner(winnerTurn);

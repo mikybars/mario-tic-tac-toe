@@ -8,17 +8,19 @@ import Star from "./assets/star.svg?react";
 import Pirana from "./assets/pirana.svg?react";
 
 const characters = {
-  Mario: <Mario />,
-  Koopa: <Koopa />,
-  Bowser: <Bowser />,
-  Toad: <Toad />,
-  Goomba: <Goomba />,
-  Racoon: <Racoon />,
-  Star: <Star />,
-  Pirana: <Pirana />,
+  Mario: <Mario title="Mario" />,
+  Koopa: <Koopa title="Koopa" />,
+  Bowser: <Bowser title="Bowser" />,
+  Toad: <Toad title="Toad" />,
+  Goomba: <Goomba title="Goomba" />,
+  Racoon: <Racoon title="Racoon" />,
+  Star: <Star title="Star" />,
+  Pirana: <Pirana title="Pirana" />,
 };
 
 export default {
+  ...characters,
+
   ALL: Object.values(characters),
 
   random() {

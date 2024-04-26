@@ -12,6 +12,10 @@ default:
 build:
 	npm run build
 
+# run tests
+test:
+	npm test
+
 # build & deploy to production
 deploy: build
 	netlify deploy --prod --dir={{publish_dir}}
