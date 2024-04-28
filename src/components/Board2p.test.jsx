@@ -8,8 +8,6 @@ describe("<Board 2-players />", () => {
   let user;
   let squares;
   const twoPlayersBoard = {
-    onWinner: vi.fn(),
-    onDraw: vi.fn(),
     players: {
       [TURN.X]: {
         symbol: characters.Mario,
@@ -22,6 +20,8 @@ describe("<Board 2-players />", () => {
 
   beforeEach(() => {
     user = userEvent.setup();
+    twoPlayersBoard.onWinner = vi.fn();
+    twoPlayersBoard.onDraw = vi.fn();
     component = render(<Board {...twoPlayersBoard} />);
     squares = component.container.querySelectorAll(".square");
   });
@@ -57,7 +57,8 @@ describe("<Board 2-players />", () => {
 
     await vi.waitFor(
       () => {
-        expect(twoPlayersBoard.onWinner).toHaveBeenCalledWith(TURN.X);
+        expect(twoPlayersBoard.onWinner).toBeCalledWith(TURN.X);
+        expect(twoPlayersBoard.onDraw).not.toBeCalled();
       },
       { timeout: 1500 },
     );
@@ -73,7 +74,26 @@ describe("<Board 2-players />", () => {
     );
 
     await vi.waitFor(() => {
-      expect(twoPlayersBoard.onDraw).toHaveBeenCalled();
+      expect(twoPlayersBoard.onDraw).toBeCalled();
+      expect(twoPlayersBoard.onWinner).not.toBeCalled();
     });
+  });
+
+  test("game does not end in draw when all squares are taken but there is a winner", async () => {
+    const squares = component.container.querySelectorAll(".square");
+
+    await Promise.all(
+      [4, 1, 0, 3, 2, 5, 7, 6, 8].map((i) => {
+        user.click(squares[i]);
+      }),
+    );
+
+    await vi.waitFor(
+      () => {
+        expect(twoPlayersBoard.onWinner).toBeCalled();
+        expect(twoPlayersBoard.onDraw).not.toBeCalled();
+      },
+      { timeout: 1500 },
+    );
   });
 });

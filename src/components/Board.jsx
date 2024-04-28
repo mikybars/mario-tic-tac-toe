@@ -48,10 +48,7 @@ export function Board({
   }, [draw]);
 
   useEffect(() => {
-    if (winnerCombo === null) {
-      return;
-    }
-    animateWinnerCombo();
+    if (winnerCombo !== null) animateWinnerCombo();
   }, [winnerCombo]);
 
   const playManagedTurn = playTurn;
@@ -87,12 +84,15 @@ export function Board({
     const newTurn = turn === TURN.X ? TURN.O : TURN.X;
     setTurn(newTurn);
 
-    checkWinner(newBoard);
-    checkDraw(newBoard);
-  }
-
   function autoPlay() {
     return board.findIndex((turnPlayed) => turnPlayed === null);
+    const newWinnerCombo = findWinner(newBoard);
+    if (newWinnerCombo) {
+      const [a, b, c] = newWinnerCombo;
+      setWinnerCombo([a, b, c].map((i) => ({ index: i })));
+    } else if (checkDraw(newBoard)) {
+      setDraw(true);
+    }
   }
 
   function simulateThinking(action) {
@@ -100,21 +100,17 @@ export function Board({
   }
 
   function checkDraw(boardToCheck) {
-    setDraw(boardToCheck.every((turnPlayed) => turnPlayed !== null));
+    return boardToCheck.every((turnPlayed) => turnPlayed !== null);
   }
 
-  function checkWinner(boardToCheck) {
+  function findWinner(boardToCheck) {
     for (const [a, b, c] of WINNING_COMBINATIONS) {
       if (
         boardToCheck[a] &&
         boardToCheck[a] === boardToCheck[b] &&
         boardToCheck[a] === boardToCheck[c]
       ) {
-        setWinnerCombo(
-          [a, b, c].map((w) => ({
-            index: w,
-          })),
-        );
+        return [a, b, c];
       }
     }
   }
