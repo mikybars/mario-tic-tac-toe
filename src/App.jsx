@@ -24,6 +24,7 @@ function App() {
   const [draw, setDraw] = useState(false);
   const [gameId, setGameId] = useState(1);
   const [turn, setTurn] = useState(null);
+  const [initialTurn, setInitialTurn] = useState(TURN.X);
   const [gameMode, setGameMode] = useState(GAME_MODE.ONE_P);
   const [playerCharacter, setPlayerCharacter] = useState(() => {
     const [_, randomCharacter1] = Characters.random();
@@ -38,9 +39,9 @@ function App() {
     [TURN.O]: "Jugador 2",
   });
 
-  useEffect(pickRandomCharactersForManagedPlayers, [gameMode]);
+  useEffect(pickRandomCharacterForManagedPlayer, [gameMode]);
 
-  function pickRandomCharactersForManagedPlayers() {
+  function pickRandomCharacterForManagedPlayer() {
     for (const turn of Object.getOwnPropertySymbols(gameMode)) {
       if (gameMode[turn].isManaged) {
         const [name, character] = Characters.randomExcluding(
@@ -53,14 +54,15 @@ function App() {
     }
   }
 
-  function onWinner(winnerTurn) {
-    confetti();
-    setWinner(winnerTurn);
-  }
+  useEffect(() => {
+    if (winner) confetti();
+  }, [winner]);
 
-  function onDraw() {
-    setDraw(true);
-  }
+  useEffect(() => {
+    if (winner || draw) {
+      setInitialTurn(initialTurn === TURN.X ? TURN.O : TURN.X);
+    }
+  }, [winner, draw]);
 
   function resetGame() {
     const nextGame = gameId + 1;
@@ -122,8 +124,9 @@ function App() {
         <Board
           key={gameId}
           players={players()}
-          onWinner={onWinner}
-          onDraw={onDraw}
+          initialTurn={initialTurn}
+          onWinner={(winnerTurn) => setWinner(winnerTurn)}
+          onDraw={() => setDraw(true)}
           onChangeTurn={setTurn}
         />
       </section>

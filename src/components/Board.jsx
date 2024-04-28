@@ -17,9 +17,15 @@ const WINNING_COMBINATIONS = [
   [2, 4, 6],
 ];
 
-export function Board({ players, onWinner, onDraw, onChangeTurn }) {
+export function Board({
+  players,
+  initialTurn,
+  onWinner,
+  onDraw,
+  onChangeTurn,
+}) {
   const [board, setBoard] = useState(Array(9).fill(null));
-  const [turn, setTurn] = useState(TURN.X);
+  const [turn, setTurn] = useState(initialTurn ?? TURN.X);
   const [draw, setDraw] = useState(false);
   const [winnerCombo, setWinnerCombo] = useState(null);
 
