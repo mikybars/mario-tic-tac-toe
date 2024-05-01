@@ -1,23 +1,28 @@
 import { render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import characters from "../characters";
-import { Board, TURN } from "./Board";
 import { act } from "react-dom/test-utils";
+import characters from "../characters";
+import { TURN } from "../components/Board";
+import { Board } from "./Board";
+import { Player as PlayerModel } from "../model/player";
 
 describe("<Board 1-players />", () => {
   let component;
   let user;
   let squares;
   const onePlayerBoard = {
-    players: {
-      [TURN.X]: {
-        symbol: characters.Mario,
-      },
-      [TURN.O]: {
-        isManaged: true,
-        symbol: characters.Bowser,
-      },
-    },
+    cpuTurn: TURN.O,
+    initialTurn: TURN.X,
+    players: new Map([
+      [
+        TURN.X,
+        new PlayerModel({ character: characters.Mario, name: "Jugador 1" }),
+      ],
+      [
+        TURN.O,
+        new PlayerModel({ character: characters.Bowser, name: "Jugador 2" }),
+      ],
+    ]),
   };
 
   beforeEach(() => {

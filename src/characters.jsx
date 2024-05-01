@@ -18,23 +18,23 @@ const characters = {
   Pirana: <Pirana title="Pirana" />,
 };
 
+function generateDistinctRandomNumbers(n, bound) {
+  const numbers = new Set();
+  while (numbers.size < n) {
+    numbers.add(Math.floor(Math.random() * bound));
+  }
+  return Array.from(numbers);
+}
+
 export default {
   ...characters,
 
   ALL: Object.values(characters),
 
-  random() {
-    const characterIndex = Math.floor(
-      Math.random() * Object.keys(characters).length,
+  randomCharacters(count) {
+    const numberOfCharacters = Object.entries(characters).length;
+    return generateDistinctRandomNumbers(count, numberOfCharacters).map(
+      (i) => Object.entries(characters)[i],
     );
-    return Object.entries(characters)[characterIndex];
-  },
-
-  randomExcluding() {
-    const [name, character] = this.random();
-    if (!Array.prototype.includes.call(arguments, character)) {
-      return [name, character];
-    }
-    return this.randomExcluding(...arguments);
   },
 };

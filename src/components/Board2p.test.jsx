@@ -1,27 +1,31 @@
 import { render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import characters from "../characters";
-import { Board, TURN } from "./Board";
+import { TURN } from "../components/Board";
+import { Board } from "./Board";
+import { Player as PlayerModel } from "../model/player";
 
 describe("<Board 2-players />", () => {
   let component;
   let user;
   let squares;
   const twoPlayersBoard = {
-    players: {
-      [TURN.X]: {
-        symbol: characters.Mario,
-      },
-      [TURN.O]: {
-        symbol: characters.Bowser,
-      },
-    },
+    initialTurn: TURN.X,
+    players: new Map([
+      [
+        TURN.X,
+        new PlayerModel({ character: characters.Mario, name: "Jugador 1" }),
+      ],
+      [
+        TURN.O,
+        new PlayerModel({ character: characters.Bowser, name: "Jugador 2" }),
+      ],
+    ]),
   };
 
   beforeEach(() => {
     user = userEvent.setup();
-    twoPlayersBoard.onWinner = vi.fn();
-    twoPlayersBoard.onDraw = vi.fn();
+    twoPlayersBoard.onGameOver = vi.fn();
     component = render(<Board {...twoPlayersBoard} />);
     squares = component.container.querySelectorAll(".square");
   });
@@ -57,8 +61,13 @@ describe("<Board 2-players />", () => {
 
     await vi.waitFor(
       () => {
-        expect(twoPlayersBoard.onWinner).toBeCalledWith(TURN.X);
-        expect(twoPlayersBoard.onDraw).not.toBeCalled();
+        expect(twoPlayersBoard.onGameOver).toBeCalledWith({
+          winner: {
+            symbol: TURN.X,
+            combo: [0, 1, 2],
+            numberOfMoves: 3,
+          },
+        });
       },
       { timeout: 1500 },
     );
@@ -74,8 +83,7 @@ describe("<Board 2-players />", () => {
     );
 
     await vi.waitFor(() => {
-      expect(twoPlayersBoard.onDraw).toBeCalled();
-      expect(twoPlayersBoard.onWinner).not.toBeCalled();
+      expect(twoPlayersBoard.onGameOver).toBeCalledWith({ draw: true });
     });
   });
 
@@ -90,8 +98,14 @@ describe("<Board 2-players />", () => {
 
     await vi.waitFor(
       () => {
-        expect(twoPlayersBoard.onWinner).toBeCalled();
-        expect(twoPlayersBoard.onDraw).not.toBeCalled();
+        expect(twoPlayersBoard.onGameOver).toBeCalledWith({
+          winner: {
+            symbol: TURN.X,
+            combo: [0, 4, 8],
+            numberOfMoves: 5,
+          },
+        });
+        expect(twoPlayersBoard.onGameOver).toBeCalled();
       },
       { timeout: 1500 },
     );

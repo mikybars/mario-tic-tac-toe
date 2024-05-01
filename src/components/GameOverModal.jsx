@@ -9,7 +9,7 @@ export function GameOverModal({ winner, resetGame }) {
         <h2 className="game-result__text">{gameResult}</h2>
         <div className="game-result__symbol">
           {winner ? (
-            <Square>{winner.symbol}</Square>
+            <Square>{winner.character}</Square>
           ) : (
             <img src={question} alt="question mark" />
           )}

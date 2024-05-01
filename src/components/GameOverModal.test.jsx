@@ -8,7 +8,7 @@ describe("<GameOverModal />", () => {
   const modal = {
     winner: {
       name: "pepe",
-      symbol: characters.Goomba,
+      character: characters.Goomba,
     },
     resetGame: vi.fn(),
   };

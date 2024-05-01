@@ -1,57 +1,63 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Board as BoardModel } from "../model/board";
+import { useStrategy } from "../hooks/useStrategy";
 import { Square } from "./Square";
 
 export const TURN = {
-  X: Symbol("X"),
-  O: Symbol("O"),
+  X: {
+    toString: () => "X",
+  },
+  O: {
+    toString: () => "O",
+  },
 };
 
-const WINNING_COMBINATIONS = [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  [0, 4, 8],
-  [2, 4, 6],
-];
+TURN.X.other = TURN.O;
+TURN.O.other = TURN.X;
+
+function simulateThinking(action) {
+  setTimeout(action, 1000);
+}
 
 export function Board({
   players,
+  cpuTurn,
   initialTurn,
-  onWinner,
-  onDraw,
   onChangeTurn,
+  onGameOver,
 }) {
-  const [board, setBoard] = useState(Array(9).fill(null));
-  const [turn, setTurn] = useState(initialTurn ?? TURN.X);
-  const [draw, setDraw] = useState(false);
-  const [winnerCombo, setWinnerCombo] = useState(null);
+  const [board, setBoard] = useState(new BoardModel());
+  const [winnerCombo, setWinnerCombo] = useState();
+  const turn = useRef(initialTurn);
+  const [cpuMove, recalculateStrategy] = useStrategy({
+    cpuSymbol: cpuTurn,
+  });
+
+  const playCpuTurn = () =>
+    simulateThinking(() => playTurn(cpuMove({ board })));
 
   useEffect(() => {
-    if (players[turn].isManaged) {
-      simulateThinking(() => playManagedTurn(autoPlay()));
-    }
-  }, [players, turn]);
+    notifyGameOver();
+    if (board.gameOver) return;
+    if (!board.isEmpty()) changeTurn();
+    if (turn.current === cpuTurn) playCpuTurn();
+  }, [board]);
 
   useEffect(() => {
-    if (typeof onChangeTurn === "function") {
-      onChangeTurn(turn);
-    }
-  }, [turn]);
+    if (turn.current === cpuTurn) playCpuTurn();
+  }, [cpuTurn]);
 
   useEffect(() => {
-    if (draw && typeof onDraw === "function") {
-      onDraw();
-    }
-  }, [draw]);
-
-  useEffect(() => {
-    if (winnerCombo !== null) animateWinnerCombo();
+    if (winnerCombo) animateWinnerCombo();
   }, [winnerCombo]);
 
-  const playManagedTurn = playTurn;
+  function changeTurn() {
+    turn.current = turn.current.other;
+
+    if (typeof onChangeTurn === "function") {
+      onChangeTurn(turn.current);
+    }
+  }
 
   function animateWinnerCombo() {
     const firstNotHighlighted = winnerCombo.findIndex((w) => !w.isHighlighted);
@@ -60,71 +66,48 @@ export function Board({
         const newWinnerCombo = [...winnerCombo];
         newWinnerCombo[firstNotHighlighted].isHighlighted = true;
         setWinnerCombo(newWinnerCombo);
-      } else if (typeof onWinner === "function") {
-        // all squares are highlighted => notify winner
-        const winnerTurn = board[winnerCombo[0].index];
-        onWinner(winnerTurn);
+      } else {
+        gameOver();
       }
     }, 300);
   }
 
-  function playUserControlledTurn(squareIndex) {
-    if (!players[turn].isManaged) {
-      playTurn(squareIndex);
+  function gameOver() {
+    onGameOver(board.gameOver);
+    recalculateStrategy(board.gameOver);
+  }
+
+  function playUserTurn(square) {
+    if (turn.current !== cpuTurn) {
+      playTurn(square);
     }
   }
 
-  function playTurn(squareIndex) {
-    if (board[squareIndex] !== null || winnerCombo !== null || draw) return;
+  function playTurn(square) {
+    if (board.gameOver || board.isTaken(square)) return;
+    setBoard(board.afterPlaying({ symbol: turn.current, square }));
+  }
 
-    const newBoard = [...board];
-    newBoard[squareIndex] = turn;
-    setBoard(newBoard);
-
-    const newTurn = turn === TURN.X ? TURN.O : TURN.X;
-    setTurn(newTurn);
-
-  function autoPlay() {
-    return board.findIndex((turnPlayed) => turnPlayed === null);
-    const newWinnerCombo = findWinner(newBoard);
-    if (newWinnerCombo) {
-      const [a, b, c] = newWinnerCombo;
+  function notifyGameOver() {
+    if (board.gameOver?.winner) {
+      const [a, b, c] = board.gameOver.winner.combo;
       setWinnerCombo([a, b, c].map((i) => ({ index: i })));
-    } else if (checkDraw(newBoard)) {
-      setDraw(true);
+    }
+    if (board.gameOver?.draw) {
+      gameOver();
     }
   }
 
-  function simulateThinking(action) {
-    setTimeout(action, 1000);
-  }
-
-  function checkDraw(boardToCheck) {
-    return boardToCheck.every((turnPlayed) => turnPlayed !== null);
-  }
-
-  function findWinner(boardToCheck) {
-    for (const [a, b, c] of WINNING_COMBINATIONS) {
-      if (
-        boardToCheck[a] &&
-        boardToCheck[a] === boardToCheck[b] &&
-        boardToCheck[a] === boardToCheck[c]
-      ) {
-        return [a, b, c];
-      }
-    }
-  }
-
-  return board.map((turnPlayed, index) => (
+  return [...board].map((turnPlayed, square) => (
     <Square
-      key={index}
-      index={index}
-      play={playUserControlledTurn}
+      key={square}
+      index={square}
+      play={playUserTurn}
       isWinner={winnerCombo?.some(
-        (w) => w?.index === index && w?.isHighlighted,
+        (w) => w?.index === square && w?.isHighlighted,
       )}
     >
-      {turnPlayed ? players[turnPlayed].symbol : null}
+      {turnPlayed ? players.get(turnPlayed).character : null}
     </Square>
   ));
 }

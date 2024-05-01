@@ -1,93 +1,79 @@
 import confetti from "canvas-confetti";
 import clsx from "clsx";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import logo from "./assets/logo.png";
 import { default as Characters } from "./characters";
 import { Board, TURN } from "./components/Board";
 import { GameOverModal } from "./components/GameOverModal";
 import Player from "./components/Player";
+import { Player as PlayerModel } from "./model/player";
 
 const GAME_MODE = {
-  ONE_P: {
-    [TURN.X]: { isManaged: false },
-    [TURN.O]: { isManaged: true },
-  },
-  TWO_P: {
-    [TURN.X]: { isManaged: false },
-    [TURN.O]: { isManaged: false },
-  },
+  ONE_P: { title: "1 jugador", cpuTurn: TURN.O },
+  TWO_P: { title: "2 jugadores" },
 };
 
 function App() {
-  const [winner, setWinner] = useState(null);
-  const [draw, setDraw] = useState(false);
+  const initialTurn = useRef(TURN.X);
+  const [gameOver, setGameOver] = useState();
   const [gameId, setGameId] = useState(1);
-  const [turn, setTurn] = useState(null);
-  const [initialTurn, setInitialTurn] = useState(TURN.X);
+  const [turn, setTurn] = useState(initialTurn.current);
   const [gameMode, setGameMode] = useState(GAME_MODE.ONE_P);
-  const [playerCharacter, setPlayerCharacter] = useState(() => {
-    const [_, randomCharacter1] = Characters.random();
-    const [__, randomCharacter2] = Characters.randomExcluding(randomCharacter1);
-    return {
-      [TURN.X]: randomCharacter1,
-      [TURN.O]: randomCharacter2,
-    };
-  });
-  const [playerName, setPlayerName] = useState({
-    [TURN.X]: "Jugador 1",
-    [TURN.O]: "Jugador 2",
-  });
+  const [players, setPlayers] = useState(initializePlayers);
 
-  useEffect(pickRandomCharacterForManagedPlayer, [gameMode]);
+  useEffect(() => {
+    if (gameOver?.winner) confetti();
+  }, [gameOver]);
 
-  function pickRandomCharacterForManagedPlayer() {
-    for (const turn of Object.getOwnPropertySymbols(gameMode)) {
-      if (gameMode[turn].isManaged) {
-        const [name, character] = Characters.randomExcluding(
-          playerCharacter[TURN.X],
-          playerCharacter[TURN.O],
-        );
-        changePlayerName(turn, name);
-        changePlayerCharacter(turn, character);
-      }
-    }
+  function initializePlayers() {
+    return new Map(
+      Characters.randomCharacters(2)
+        .map(([randomName, randomCharacter], i) => [
+          ...[
+            [TURN.X, "Jugador 1"],
+            [TURN.O, "Jugador 2"],
+          ][i],
+          randomName,
+          randomCharacter,
+        ])
+        .map(([turn, defaultName, randomName, randomCharacter]) => [
+          turn,
+          new PlayerModel({
+            character: randomCharacter,
+            name: turn === gameMode.cpuTurn ? randomName : defaultName,
+          }),
+        ]),
+    );
   }
 
-  useEffect(() => {
-    if (winner) confetti();
-  }, [winner]);
-
-  useEffect(() => {
-    if (winner || draw) {
-      setInitialTurn(initialTurn === TURN.X ? TURN.O : TURN.X);
-    }
-  }, [winner, draw]);
-
   function resetGame() {
-    const nextGame = gameId + 1;
-    setGameId(nextGame);
-    setWinner(null);
-    setDraw(false);
+    setGameId((gi) => gi + 1);
+    setGameOver(undefined);
+    resetTurn();
+  }
+
+  function resetTurn() {
+    initialTurn.current = initialTurn.current.other;
+    setTurn(initialTurn.current);
   }
 
   function changePlayerCharacter(turn, newCharacter) {
-    const newPlayerCharacter = { ...playerCharacter };
-    newPlayerCharacter[turn] = newCharacter;
-    setPlayerCharacter(newPlayerCharacter);
+    replacePlayer(turn, players.get(turn).withCharacter(newCharacter));
   }
 
   function changePlayerName(turn, newName) {
-    const newPlayerName = { ...playerName };
-    newPlayerName[turn] = newName;
-    setPlayerName(newPlayerName);
+    replacePlayer(turn, players.get(turn).withName(newName));
   }
 
-  function players() {
-    const players = { ...gameMode };
-    players[TURN.X].symbol = playerCharacter[TURN.X];
-    players[TURN.O].symbol = playerCharacter[TURN.O];
-    return players;
+  function replacePlayer(turn, newPlayer) {
+    setPlayers(
+      (players) =>
+        new Map([
+          [turn, newPlayer],
+          [turn.other, players.get(turn.other).clone()],
+        ]),
+    );
   }
 
   return (
@@ -95,26 +81,15 @@ function App() {
       <img src={logo} alt="Tic Tac Toe" />
 
       <section className="game-options">
-        <button
-          className={clsx(
-            "game-mode-btn",
-            gameMode === GAME_MODE.ONE_P && "is-selected",
-          )}
-          onClick={() => setGameMode(GAME_MODE.ONE_P)}
-        >
-          1 jugador
-        </button>
-        <button
-          className={clsx(
-            "game-mode-btn",
-            gameMode === GAME_MODE.TWO_P && "is-selected",
-          )}
-          onClick={() => {
-            setGameMode(GAME_MODE.TWO_P);
-          }}
-        >
-          2 jugadores
-        </button>
+        {Object.values(GAME_MODE).map((gm) => (
+          <button
+            key={gm.title}
+            className={clsx("game-mode-btn", gm === gameMode && "is-selected")}
+            onClick={() => setGameMode(gm)}
+          >
+            {gm.title}
+          </button>
+        ))}
         <button className="game-reset-btn" onClick={resetGame}>
           Empezar de nuevo
         </button>
@@ -123,48 +98,36 @@ function App() {
       <section className="board">
         <Board
           key={gameId}
-          players={players()}
-          initialTurn={initialTurn}
-          onWinner={(winnerTurn) => setWinner(winnerTurn)}
-          onDraw={() => setDraw(true)}
+          players={players}
+          cpuTurn={gameMode.cpuTurn}
+          initialTurn={initialTurn.current}
+          onGameOver={setGameOver}
           onChangeTurn={setTurn}
         />
       </section>
 
       <section className="turn">
-        <Player
-          key={playerCharacter[TURN.X].type.name}
-          allSymbols={Characters.ALL}
-          nonEligibleSymbols={[playerCharacter[TURN.O]]}
-          initialSymbol={playerCharacter[TURN.X]}
-          initialName={playerName[TURN.X]}
-          turn={TURN.X}
-          hasTurn={turn === TURN.X}
-          isEditable={gameMode[TURN.X].isManaged === false}
-          onChangeSymbol={changePlayerCharacter}
-          onChangeName={changePlayerName}
-        />
-        <Player
-          key={playerCharacter[TURN.O].type.name}
-          allSymbols={Characters.ALL}
-          nonEligibleSymbols={[playerCharacter[TURN.X]]}
-          initialSymbol={playerCharacter[TURN.O]}
-          initialName={playerName[TURN.O]}
-          turn={TURN.O}
-          hasTurn={turn === TURN.O}
-          isEditable={gameMode[TURN.O].isManaged === false}
-          onChangeSymbol={changePlayerCharacter}
-          onChangeName={changePlayerName}
-        />
+        {[TURN.X, TURN.O]
+          .map((turn) => [turn, players.get(turn)])
+          .map(([turnPlayed, player]) => (
+            <Player
+              key={player.character?.type.name}
+              allSymbols={Characters.ALL}
+              nonEligibleSymbols={[players.get(turnPlayed.other).character]}
+              initialSymbol={player.character}
+              initialName={player.name}
+              turn={turnPlayed}
+              hasTurn={turnPlayed === turn}
+              isEditable={turnPlayed !== gameMode.cpuTurn}
+              onChangeSymbol={changePlayerCharacter}
+              onChangeName={changePlayerName}
+            />
+          ))}
       </section>
 
-      {winner || draw ? (
+      {gameOver ? (
         <GameOverModal
-          winner={
-            winner
-              ? { symbol: playerCharacter[winner], name: playerName[winner] }
-              : null
-          }
+          winner={players.get(gameOver.winner?.symbol)}
           resetGame={resetGame}
         />
       ) : null}

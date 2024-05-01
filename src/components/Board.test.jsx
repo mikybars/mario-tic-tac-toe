@@ -1,7 +1,9 @@
 import { render } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import characters from "../characters";
-import { Board, TURN } from "./Board";
+import { TURN } from "../components/Board";
+import { Player as PlayerModel } from "../model/player";
+import { Board } from "./Board";
 
 describe("<Board />", () => {
   let component;
@@ -9,14 +11,17 @@ describe("<Board />", () => {
   let squares;
   const board = {
     onChangeTurn: vi.fn(),
-    players: {
-      [TURN.X]: {
-        symbol: characters.Mario,
-      },
-      [TURN.O]: {
-        symbol: characters.Bowser,
-      },
-    },
+    initialTurn: TURN.X,
+    players: new Map([
+      [
+        TURN.X,
+        new PlayerModel({ character: characters.Mario, name: "Jugador 1" }),
+      ],
+      [
+        TURN.O,
+        new PlayerModel({ character: characters.Bowser, name: "Jugador 2" }),
+      ],
+    ]),
   };
 
   beforeEach(() => {
