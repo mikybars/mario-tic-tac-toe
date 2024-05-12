@@ -33,6 +33,7 @@ export default function Player({
       <button
         className={clsx("player__symbol", hasTurn && "is-selected")}
         disabled={!isEditable}
+        aria-label={`change turn ${turn} character`}
         onClick={toggleChoosingSymbol}
       >
         {symbol}
@@ -53,10 +54,9 @@ export default function Player({
           {allSymbols.map((symbol) => (
             <li key={symbol.type.name}>
               <button
-                className={clsx(
-                  "symbol-btn",
-                  nonEligibleSymbols.includes(symbol) && "is-disabled",
-                )}
+                className="symbol-btn"
+                aria-label={`select ${symbol.type.name}`}
+                disabled={nonEligibleSymbols.includes(symbol)}
                 onClick={() => {
                   setSymbol(symbol);
                   toggleChoosingSymbol();

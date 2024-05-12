@@ -14,7 +14,7 @@ const GAME_MODE = {
   TWO_P: { title: "2 jugadores" },
 };
 
-function App() {
+export function App() {
   const initialTurn = useRef(TURN.X);
   const [gameOver, setGameOver] = useState();
   const [gameId, setGameId] = useState(1);
