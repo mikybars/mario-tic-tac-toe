@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Board as BoardModel } from "../model/board";
+import { emptyBoard } from "../model/board";
 import { useStrategy } from "../hooks/useStrategy";
 import { Square } from "./Square";
 
@@ -26,7 +26,7 @@ export function Board({
   onChangeTurn,
   onGameOver,
 }) {
-  const [board, setBoard] = useState(new BoardModel());
+  const [board, setBoard] = useState(emptyBoard());
   const [winnerCombo, setWinnerCombo] = useState();
   const turn = useRef(initialTurn);
   const [cpuMove, recalculateStrategy] = useStrategy({

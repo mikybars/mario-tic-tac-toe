@@ -11,10 +11,16 @@ const WINNING_COMBINATIONS = [
 
 const EMPTY = null;
 
+export const emptyBoard = () => new Board();
+
+/**
+ * Board.
+ */
 export class Board {
   constructor(state) {
     this.squares = state ?? Array(9).fill(EMPTY);
     this.gameOver = this.#calculateGameOver();
+    Object.freeze(this);
   }
 
   #calculateGameOver() {
@@ -64,7 +70,9 @@ export class Board {
       wc.filter((i) => this.squares[i] === EMPTY).length === 1 &&
       wc.filter((i) => this.squares[i] === symbol).length === 2;
     const emptySquare = (wc) => wc.find((i) => this.squares[i] === EMPTY);
-    return WINNING_COMBINATIONS.filter(winnerInOne).map(emptySquare);
+    return Array.from(
+      new Set(WINNING_COMBINATIONS.filter(winnerInOne).map(emptySquare)),
+    );
   }
 
   totalMovesBy(symbol) {

@@ -7,7 +7,6 @@ import { Board } from "./Board";
 import { Player as PlayerModel } from "../model/player";
 
 describe("<Board 1-players />", () => {
-  let component;
   let user;
   let squares;
   const onePlayerBoard = {
@@ -26,9 +25,10 @@ describe("<Board 1-players />", () => {
   };
 
   beforeEach(() => {
+    render(<Board {...onePlayerBoard} />);
+    squares = document.querySelectorAll(".square");
+
     user = userEvent.setup();
-    component = render(<Board {...onePlayerBoard} />);
-    squares = component.container.querySelectorAll(".square");
   });
 
   test("player 1 must wait his turn", async () => {

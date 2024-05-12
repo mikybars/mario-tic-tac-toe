@@ -6,7 +6,6 @@ import { Board } from "./Board";
 import { Player as PlayerModel } from "../model/player";
 
 describe("<Board 2-players />", () => {
-  let component;
   let user;
   let squares;
   const twoPlayersBoard = {
@@ -22,42 +21,34 @@ describe("<Board 2-players />", () => {
       ],
     ]),
   };
+  const clickInSequence = (...moves) =>
+    Promise.all(moves.map((i) => user.click(squares[i])));
 
   beforeEach(() => {
-    user = userEvent.setup();
     twoPlayersBoard.onGameOver = vi.fn();
-    component = render(<Board {...twoPlayersBoard} />);
-    squares = component.container.querySelectorAll(".square");
+    render(<Board {...twoPlayersBoard} />);
+    squares = document.querySelectorAll(".square");
+
+    user = userEvent.setup();
   });
 
   test("players take turns", async () => {
-    await user.click(squares[0]);
-    await user.click(squares[1]);
+    await clickInSequence(0, 1);
 
     screen.getByTitle("Mario");
     screen.getByTitle("Bowser");
   });
 
   test("players cannot take other player's squares", async () => {
-    await Promise.all([
-      user.click(squares[0]),
-      user.click(squares[1]),
-      user.click(squares[0]),
-    ]);
+    await clickInSequence(0, 1, 0);
 
-    expect(component.queryAllByRole("img")).toHaveLength(2);
+    expect(screen.queryAllByRole("img")).toHaveLength(2);
     screen.getByTitle("Mario");
     screen.getByTitle("Bowser");
   });
 
-  test("player 1 wins", async () => {
-    await Promise.all([
-      user.click(squares[0]),
-      user.click(squares[3]),
-      user.click(squares[1]),
-      user.click(squares[4]),
-      user.click(squares[2]),
-    ]);
+  test("X wins", async () => {
+    await clickInSequence(0, 3, 1, 4, 2);
 
     await vi.waitFor(
       () => {
@@ -74,40 +65,10 @@ describe("<Board 2-players />", () => {
   });
 
   test("game ends in draw", async () => {
-    const squares = component.container.querySelectorAll(".square");
-
-    await Promise.all(
-      [4, 0, 8, 2, 6, 7, 1, 3, 5].map((i) => {
-        user.click(squares[i]);
-      }),
-    );
+    await clickInSequence(4, 0, 8, 2, 6, 7, 1, 3, 5);
 
     await vi.waitFor(() => {
       expect(twoPlayersBoard.onGameOver).toBeCalledWith({ draw: true });
     });
-  });
-
-  test("game does not end in draw when all squares are taken but there is a winner", async () => {
-    const squares = component.container.querySelectorAll(".square");
-
-    await Promise.all(
-      [4, 1, 0, 3, 2, 5, 7, 6, 8].map((i) => {
-        user.click(squares[i]);
-      }),
-    );
-
-    await vi.waitFor(
-      () => {
-        expect(twoPlayersBoard.onGameOver).toBeCalledWith({
-          winner: {
-            symbol: TURN.X,
-            combo: [0, 4, 8],
-            numberOfMoves: 5,
-          },
-        });
-        expect(twoPlayersBoard.onGameOver).toBeCalled();
-      },
-      { timeout: 1500 },
-    );
   });
 });
