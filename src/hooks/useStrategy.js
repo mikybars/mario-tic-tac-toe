@@ -1,124 +1,124 @@
-import { useEffect, useState } from "react";
-import { BoundedCounter } from "../model/boundedCounter";
-import { noop, shuffled, storage } from "../utils";
+import { useEffect, useState } from 'react'
+import { BoundedCounter } from '../model/boundedCounter'
+import { noop, shuffled, storage } from '../utils'
 
 export function useStrategy({ cpuSymbol }) {
   const [lastGameWasDraw, setLastGameWasDraw] = useState(
-    storage.getObject("lastGameWasDraw") ?? false,
-  );
+    storage.getObject('lastGameWasDraw') ?? false
+  )
   const [minMovesToWin, setMinMovesToWin] = useState(() => {
-    const counters = storage.getObject("counters");
+    const counters = storage.getObject('counters')
     return {
       [cpuSymbol]: new BoundedCounter(3, 5, counters?.[0]),
-      [cpuSymbol?.other]: new BoundedCounter(3, 5, counters?.[1]),
-    };
-  });
+      [cpuSymbol?.other]: new BoundedCounter(3, 5, counters?.[1])
+    }
+  })
 
   useEffect(() => {
-    storage.putObject("lastGameWasDraw", lastGameWasDraw);
-  }, [lastGameWasDraw]);
+    storage.putObject('lastGameWasDraw', lastGameWasDraw)
+  }, [lastGameWasDraw])
 
   useEffect(() => {
-    storage.putObject("counters", [
+    storage.putObject('counters', [
       minMovesToWin[cpuSymbol].value,
-      minMovesToWin[cpuSymbol?.other].value,
-    ]);
-  }, [minMovesToWin]);
+      minMovesToWin[cpuSymbol?.other].value
+    ])
+  }, [cpuSymbol, minMovesToWin])
 
   function levelUp() {
-    const oldCpuMinMoves = minMovesToWin[cpuSymbol];
-    const newCpuMinMoves = oldCpuMinMoves.dec();
+    const oldCpuMinMoves = minMovesToWin[cpuSymbol]
+    const newCpuMinMoves = oldCpuMinMoves.dec()
     setMinMovesToWin({
       [cpuSymbol]: newCpuMinMoves,
       [cpuSymbol?.other]: minMovesToWin[cpuSymbol?.other].incIf(
-        newCpuMinMoves === oldCpuMinMoves,
-      ),
-    });
+        newCpuMinMoves === oldCpuMinMoves
+      )
+    })
   }
 
   function levelDown() {
-    const oldCpuMinMoves = minMovesToWin[cpuSymbol];
-    const newCpuMinMoves = oldCpuMinMoves.inc();
+    const oldCpuMinMoves = minMovesToWin[cpuSymbol]
+    const newCpuMinMoves = oldCpuMinMoves.inc()
     setMinMovesToWin({
       [cpuSymbol]: newCpuMinMoves,
       [cpuSymbol?.other]: minMovesToWin[cpuSymbol?.other].decIf(
-        newCpuMinMoves === oldCpuMinMoves,
-      ),
-    });
+        newCpuMinMoves === oldCpuMinMoves
+      )
+    })
   }
 
   function recalculate(gameOver) {
     if (gameOver.winner) {
-      newStrategyOnWinner();
+      newStrategyOnWinner()
     } else {
-      newStrategyOnDraw();
+      newStrategyOnDraw()
     }
-    setLastGameWasDraw(gameOver?.draw ?? false);
+    setLastGameWasDraw(gameOver?.draw ?? false)
 
     function newStrategyOnWinner() {
-      const { symbol: winner, numberOfMoves } = gameOver.winner;
-      const wasTooEasy = numberOfMoves <= minMovesToWin[winner].value;
-      const cpuWonTooEasy = wasTooEasy && winner === cpuSymbol;
-      const userWonTooEasy = wasTooEasy && winner === cpuSymbol?.other;
+      const { symbol: winner, numberOfMoves } = gameOver.winner
+      const wasTooEasy = numberOfMoves <= minMovesToWin[winner].value
+      const cpuWonTooEasy = wasTooEasy && winner === cpuSymbol
+      const userWonTooEasy = wasTooEasy && winner === cpuSymbol?.other
       if (cpuWonTooEasy) {
-        levelDown();
+        levelDown()
       } else if (userWonTooEasy) {
-        levelUp();
+        levelUp()
       }
     }
 
     function newStrategyOnDraw() {
-      const twoDrawsInARow = gameOver.draw && lastGameWasDraw;
+      const twoDrawsInARow = gameOver.draw && lastGameWasDraw
       if (twoDrawsInARow) {
-        levelDown();
+        levelDown()
       }
     }
   }
 
   function calculateNextBestMove(board, candidates) {
-    const shuffledCandidates = shuffled(candidates);
+    const shuffledCandidates = shuffled(candidates)
     return (
       shuffledCandidates.find(
         (candidate) =>
           board
             .afterPlaying({ symbol: cpuSymbol, square: candidate })
-            .allWinnerMovesBy(cpuSymbol).length > 0,
+            .allWinnerMovesBy(cpuSymbol).length > 0
       ) ?? shuffledCandidates[0]
-    );
+    )
   }
 
   function play({ board }) {
-    if (board.gameOver) return;
+    if (board.gameOver) return
 
     const cpuCanWinIn = (numberOfMoves) =>
-      numberOfMoves >= minMovesToWin[cpuSymbol].value;
+      numberOfMoves >= minMovesToWin[cpuSymbol].value
     const userCanNotWinIn = (numberOfMoves) =>
-      numberOfMoves < minMovesToWin[cpuSymbol?.other].value;
+      numberOfMoves < minMovesToWin[cpuSymbol?.other].value
 
-    const winnerMoves = board.allWinnerMovesBy(cpuSymbol);
+    const winnerMoves = board.allWinnerMovesBy(cpuSymbol)
     if (
       winnerMoves.length > 0 &&
       cpuCanWinIn(board.totalMovesBy(cpuSymbol) + 1)
     ) {
-      return winnerMoves[0];
+      return winnerMoves[0]
     }
 
-    const blockingMoves = board.allWinnerMovesBy(cpuSymbol?.other);
+    const blockingMoves = board.allWinnerMovesBy(cpuSymbol?.other)
     if (
       blockingMoves.length > 0 &&
       userCanNotWinIn(board.totalMovesBy(cpuSymbol?.other) + 1)
     ) {
-      return blockingMoves[0];
+      return blockingMoves[0]
     }
 
     const nextMove = calculateNextBestMove(
       board,
-      board.emptySquaresExcluding(...winnerMoves, ...blockingMoves),
-    );
+      board.emptySquaresExcluding(...winnerMoves, ...blockingMoves)
+    )
     return nextMove !== undefined
       ? nextMove
-      : [...blockingMoves, ...winnerMoves].find((first) => first !== undefined);
+      : [...blockingMoves, ...winnerMoves].find((first) => first !== undefined)
   }
 
-  return cpuSymbol ? [play, recalculate] : [noop, noop];
+  return cpuSymbol ? [play, recalculate] : [noop, noop]
 }

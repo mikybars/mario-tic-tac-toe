@@ -6,12 +6,12 @@ const WINNING_COMBINATIONS = [
   [1, 4, 7],
   [2, 5, 8],
   [0, 4, 8],
-  [2, 4, 6],
-];
+  [2, 4, 6]
+]
 
-const EMPTY = null;
+const EMPTY = null
 
-export const emptyBoard = () => new Board();
+export const emptyBoard = () => new Board()
 
 /**
  * Represents a game board, typically used in games like Tic Tac Toe.
@@ -24,9 +24,9 @@ export class Board {
    *                 If not provided, initializes the board with 9 empty squares.
    */
   constructor(state) {
-    this.squares = state ?? Array(9).fill(EMPTY);
-    this.gameOver = this.#calculateGameOver();
-    Object.freeze(this);
+    this.squares = state ?? Array(9).fill(EMPTY)
+    this.gameOver = this.#calculateGameOver()
+    Object.freeze(this)
   }
 
   /**
@@ -35,22 +35,22 @@ export class Board {
    * @private
    */
   #calculateGameOver() {
-    const winnerCombo = this.#findFirstWinnerCombo();
-    const boardIsFull = this.squares.every((square) => square !== EMPTY);
+    const winnerCombo = this.#findFirstWinnerCombo()
+    const boardIsFull = this.squares.every((square) => square !== EMPTY)
 
     if (winnerCombo) {
-      const winnerSymbol = this.squares[winnerCombo[0]];
+      const winnerSymbol = this.squares[winnerCombo[0]]
       return {
         winner: {
           symbol: winnerSymbol,
           combo: winnerCombo,
-          numberOfMoves: this.totalMovesBy(winnerSymbol),
-        },
-      };
+          numberOfMoves: this.totalMovesBy(winnerSymbol)
+        }
+      }
     } else if (boardIsFull) {
       return {
-        draw: true,
-      };
+        draw: true
+      }
     }
   }
 
@@ -63,8 +63,8 @@ export class Board {
     return WINNING_COMBINATIONS.find((wc) =>
       wc
         .map((i) => this.squares[i])
-        .every((square, _, wc) => square !== EMPTY && square === wc[0]),
-    );
+        .every((square, _, wc) => square !== EMPTY && square === wc[0])
+    )
   }
 
   /**
@@ -72,7 +72,7 @@ export class Board {
    * @returns True if all squares are empty, false otherwise.
    */
   isEmpty() {
-    return this.squares.every((square) => square === EMPTY);
+    return this.squares.every((square) => square === EMPTY)
   }
 
   /**
@@ -81,7 +81,7 @@ export class Board {
    * @returns True if the square is taken, false otherwise.
    */
   isTaken(square) {
-    return this.squares[square] !== EMPTY;
+    return this.squares[square] !== EMPTY
   }
 
   /**
@@ -92,7 +92,7 @@ export class Board {
   emptySquaresExcluding(...squares) {
     return this.squares
       .flatMap((square, index) => (square === EMPTY ? [index] : []))
-      .filter((emptySquare) => !squares.includes(emptySquare));
+      .filter((emptySquare) => !squares.includes(emptySquare))
   }
 
   /**
@@ -103,11 +103,11 @@ export class Board {
   allWinnerMovesBy(symbol) {
     const winnerInOne = (wc) =>
       wc.filter((i) => this.squares[i] === EMPTY).length === 1 &&
-      wc.filter((i) => this.squares[i] === symbol).length === 2;
-    const emptySquare = (wc) => wc.find((i) => this.squares[i] === EMPTY);
+      wc.filter((i) => this.squares[i] === symbol).length === 2
+    const emptySquare = (wc) => wc.find((i) => this.squares[i] === EMPTY)
     return Array.from(
-      new Set(WINNING_COMBINATIONS.filter(winnerInOne).map(emptySquare)),
-    );
+      new Set(WINNING_COMBINATIONS.filter(winnerInOne).map(emptySquare))
+    )
   }
 
   /**
@@ -116,7 +116,7 @@ export class Board {
    * @returns Total moves made by the symbol.
    */
   totalMovesBy(symbol) {
-    return this.squares.filter((square) => square === symbol).length;
+    return this.squares.filter((square) => square === symbol).length
   }
 
   /**
@@ -125,9 +125,9 @@ export class Board {
    * @returns A new board instance with the moves applied.
    */
   afterPlaying(...moves) {
-    const newState = [...this.squares];
-    moves.forEach(({ symbol, square }) => (newState[square] = symbol));
-    return new Board(newState);
+    const newState = [...this.squares]
+    moves.forEach(({ symbol, square }) => (newState[square] = symbol))
+    return new Board(newState)
   }
 
   /**
@@ -135,6 +135,6 @@ export class Board {
    * @returns An iterator for the squares of the board.
    */
   [Symbol.iterator]() {
-    return this.squares[Symbol.iterator]();
+    return this.squares[Symbol.iterator]()
   }
 }

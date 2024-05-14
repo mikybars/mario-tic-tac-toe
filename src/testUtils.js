@@ -1,20 +1,20 @@
-import { screen } from "@testing-library/react";
-import { emptyBoard } from "./model/board";
+import { screen } from '@testing-library/react'
+import { emptyBoard } from './model/board'
 
 export function createBoardFromSketch(sketchedBoard) {
   const decodedSquares = sketchedBoard
-    .split("\n")
+    .split('\n')
     .map((row) => row.trim())
-    .join("")
-    .replace(/\|/g, "");
+    .join('')
+    .replace(/\|/g, '')
   // => "x xo  oxo"
   //     012345678
 
   return emptyBoard().afterPlaying(
     ...[...decodedSquares].flatMap((symbol, i) =>
-      symbol !== " " ? [{ symbol, square: i }] : [],
-    ),
-  );
+      symbol !== ' ' ? [{ symbol, square: i }] : []
+    )
+  )
 }
 
-export const findCharacter = async (name) => await screen.findByTitle(name);
+export const findCharacter = async(name) => await screen.findByTitle(name)

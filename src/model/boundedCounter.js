@@ -2,17 +2,17 @@ export class BoundedCounter {
   constructor(lowerBound, upperBound, value) {
     if (lowerBound > upperBound) {
       throw new RangeError(
-        `lowerBound ${lowerBound} must be less or equal than lowerBound ${lowerBound}`,
-      );
+        `lowerBound ${lowerBound} must be less or equal than lowerBound ${lowerBound}`
+      )
     }
     if (value < lowerBound || value > upperBound) {
       throw new RangeError(
-        `value ${value} must be between ${lowerBound} and ${upperBound} inclusive`,
-      );
+        `value ${value} must be between ${lowerBound} and ${upperBound} inclusive`
+      )
     }
-    this.lowerBound = lowerBound;
-    this.upperBound = upperBound;
-    this.value = value ?? lowerBound;
+    this.lowerBound = lowerBound
+    this.upperBound = upperBound
+    this.value = value ?? lowerBound
   }
 
   inc() {
@@ -20,14 +20,14 @@ export class BoundedCounter {
       return new BoundedCounter(
         this.lowerBound,
         this.upperBound,
-        this.value + 1,
-      );
+        this.value + 1
+      )
     }
-    return this;
+    return this
   }
 
   incIf(condition) {
-    return condition ? this.inc() : this;
+    return condition ? this.inc() : this
   }
 
   dec() {
@@ -35,17 +35,17 @@ export class BoundedCounter {
       return new BoundedCounter(
         this.lowerBound,
         this.upperBound,
-        this.value - 1,
-      );
+        this.value - 1
+      )
     }
-    return this;
+    return this
   }
 
   decIf(condition) {
-    return condition ? this.dec() : this;
+    return condition ? this.dec() : this
   }
 
   toString() {
-    return `${this.value} [${this.lowerBound}, ${this.upperBound}]`;
+    return `${this.value} [${this.lowerBound}, ${this.upperBound}]`
   }
 }
