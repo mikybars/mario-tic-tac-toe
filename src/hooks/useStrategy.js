@@ -1,36 +1,13 @@
 import { useEffect, useState } from "react";
 import { BoundedCounter } from "../model/boundedCounter";
-
-function noop() {}
-
-function shuffled(array) {
-  const result = [...array];
-  for (let i = result.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
-}
-
-const storage = {
-  get(key) {
-    const value = window.localStorage.getItem(key);
-    if (value != null) {
-      return JSON.parse(value);
-    }
-  },
-
-  save(key, o) {
-    return window.localStorage.setItem(key, JSON.stringify(o));
-  },
-};
+import { noop, shuffled, storage } from "../utils";
 
 export function useStrategy({ cpuSymbol }) {
   const [lastGameWasDraw, setLastGameWasDraw] = useState(
-    storage.get("lastGameWasDraw") ?? false,
+    storage.getObject("lastGameWasDraw") ?? false,
   );
   const [minMovesToWin, setMinMovesToWin] = useState(() => {
-    const counters = storage.get("counters");
+    const counters = storage.getObject("counters");
     return {
       [cpuSymbol]: new BoundedCounter(3, 5, counters?.[0]),
       [cpuSymbol?.other]: new BoundedCounter(3, 5, counters?.[1]),
@@ -38,11 +15,11 @@ export function useStrategy({ cpuSymbol }) {
   });
 
   useEffect(() => {
-    storage.save("lastGameWasDraw", lastGameWasDraw);
+    storage.putObject("lastGameWasDraw", lastGameWasDraw);
   }, [lastGameWasDraw]);
 
   useEffect(() => {
-    storage.save("counters", [
+    storage.putObject("counters", [
       minMovesToWin[cpuSymbol].value,
       minMovesToWin[cpuSymbol?.other].value,
     ]);
