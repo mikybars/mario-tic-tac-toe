@@ -2,41 +2,39 @@ import clsx from "clsx";
 import { useEffect, useState } from "react";
 
 export default function Player({
-  allSymbols,
-  nonEligibleSymbols,
-  initialSymbol,
+  allCharacters,
+  nonEligibleCharacters,
+  initialCharacter,
   initialName,
   turn,
   hasTurn,
   isEditable,
-  onChangeSymbol,
+  onChangeCharacter,
   onChangeName,
 }) {
-  const [symbol, setSymbol] = useState(initialSymbol);
+  const [character, setCharacter] = useState(initialCharacter);
   const [name, setName] = useState(initialName);
-  const [choosingSymbol, setChoosingSymbol] = useState(false);
+  const [choosingCharacter, setChoosingCharacter] = useState(false);
 
   useEffect(() => {
-    onChangeSymbol(turn, symbol);
-  }, [symbol]);
+    onChangeCharacter(turn, character);
+  }, [character]);
 
   useEffect(() => {
     onChangeName(turn, name);
   }, [name]);
 
-  function toggleChoosingSymbol() {
-    setChoosingSymbol(!choosingSymbol);
-  }
+  const toggleChoosingCharacter = () => setChoosingCharacter((v) => !v);
 
   return (
     <div className="player">
       <button
-        className={clsx("player__symbol", hasTurn && "is-selected")}
+        className={clsx("player__character", hasTurn && "is-selected")}
         disabled={!isEditable}
         aria-label={`change turn ${turn} character`}
-        onClick={toggleChoosingSymbol}
+        onClick={toggleChoosingCharacter}
       >
-        {symbol}
+        {character.image}
       </button>
       <input
         type="text"
@@ -49,20 +47,20 @@ export default function Player({
         readOnly={!isEditable}
         onChange={(e) => setName(e.target.value)}
       />
-      {choosingSymbol ? (
+      {choosingCharacter ? (
         <ul className="ui-list symbol-list">
-          {allSymbols.map((symbol) => (
-            <li key={symbol.type.name}>
+          {allCharacters.map((character) => (
+            <li key={character.name}>
               <button
                 className="symbol-btn"
-                aria-label={`select ${symbol.type.name}`}
-                disabled={nonEligibleSymbols.includes(symbol)}
+                aria-label={`select ${character.name}`}
+                disabled={nonEligibleCharacters.includes(character)}
                 onClick={() => {
-                  setSymbol(symbol);
-                  toggleChoosingSymbol();
+                  setCharacter(character);
+                  toggleChoosingCharacter();
                 }}
               >
-                {symbol}
+                {character.image}
               </button>
             </li>
           ))}

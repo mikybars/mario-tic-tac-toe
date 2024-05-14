@@ -4,6 +4,7 @@ import characters from "../characters";
 import { TURN } from "../components/Board";
 import { Board } from "./Board";
 import { Player as PlayerModel } from "../model/player";
+import { findCharacter } from "../testUtils";
 
 describe("<Board 2-players />", () => {
   let user;
@@ -35,16 +36,16 @@ describe("<Board 2-players />", () => {
   test("players take turns", async () => {
     await clickInSequence(0, 1);
 
-    screen.getByTitle("Mario");
-    screen.getByTitle("Bowser");
+    await findCharacter("Mario");
+    await findCharacter("Bowser");
   });
 
   test("players cannot take other player's squares", async () => {
     await clickInSequence(0, 1, 0);
 
-    expect(screen.queryAllByRole("img")).toHaveLength(2);
-    screen.getByTitle("Mario");
-    screen.getByTitle("Bowser");
+    expect(await screen.findAllByRole("img")).toHaveLength(2);
+    await findCharacter("Mario");
+    await findCharacter("Bowser");
   });
 
   test("X wins", async () => {

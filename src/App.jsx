@@ -29,19 +29,19 @@ export function App() {
   function initializePlayers() {
     return new Map(
       Characters.randomCharacters(2)
-        .map(([randomName, randomCharacter], i) => [
+        .map((randomCharacter, i) => [
           ...[
             [TURN.X, "Jugador 1"],
             [TURN.O, "Jugador 2"],
           ][i],
-          randomName,
           randomCharacter,
         ])
-        .map(([turn, defaultName, randomName, randomCharacter]) => [
+        .map(([turn, defaultName, randomCharacter]) => [
           turn,
           new PlayerModel({
             character: randomCharacter,
-            name: turn === gameMode.cpuTurn ? randomName : defaultName,
+            name:
+              turn === gameMode.cpuTurn ? randomCharacter.name : defaultName,
           }),
         ]),
     );
@@ -111,15 +111,15 @@ export function App() {
           .map((turn) => [turn, players.get(turn)])
           .map(([turnPlayed, player]) => (
             <Player
-              key={player.character?.type.name}
-              allSymbols={Characters.ALL}
-              nonEligibleSymbols={[players.get(turnPlayed.other).character]}
-              initialSymbol={player.character}
+              key={player.character?.name}
+              allCharacters={Characters.ALL}
+              nonEligibleCharacters={[players.get(turnPlayed.other).character]}
+              initialCharacter={player.character}
               initialName={player.name}
               turn={turnPlayed}
               hasTurn={turnPlayed === turn}
               isEditable={turnPlayed !== gameMode.cpuTurn}
-              onChangeSymbol={changePlayerCharacter}
+              onChangeCharacter={changePlayerCharacter}
               onChangeName={changePlayerName}
             />
           ))}

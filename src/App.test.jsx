@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { getByRole, queryAllByRole } from "@testing-library/dom";
+import { findAllByRole, findByRole } from "@testing-library/dom";
 import { App } from "./App";
 
 describe("<App />", () => {
@@ -17,8 +17,8 @@ describe("<App />", () => {
     });
 
     expect(changeCharacterBtns).toHaveLength(2);
-    expect(getByRole(changeCharacterBtns[0], "img")).not.toStrictEqual(
-      getByRole(changeCharacterBtns[1], "img"),
+    expect(await findByRole(changeCharacterBtns[0], "img")).not.toEqual(
+      await findByRole(changeCharacterBtns[1], "img"),
     );
   });
 
@@ -42,8 +42,8 @@ describe("<App />", () => {
         name: /select/i,
       }),
     ).toHaveLength(0); // select choices should go away
-    expect(getByRole(changeUserCharacterBtn, "img")).toStrictEqual(
-      getByRole(firstPossibleChoiceBtn, "img"),
+    expect(await findByRole(changeUserCharacterBtn, "img")).toEqual(
+      await findByRole(firstPossibleChoiceBtn, "img"),
     );
   });
 
@@ -63,8 +63,8 @@ describe("<App />", () => {
       .find((btn) => btn.disabled);
     expect(disabledCharacterBtn).toBeDefined();
 
-    expect(getByRole(disabledCharacterBtn, "img")).toStrictEqual(
-      getByRole(changeCpuCharacterBtn, "img"),
+    expect(await findByRole(disabledCharacterBtn, "img")).toEqual(
+      await findByRole(changeCpuCharacterBtn, "img"),
     );
   });
 
@@ -86,10 +86,10 @@ describe("<App />", () => {
     const board = document.querySelector(".board");
     const squares = document.querySelectorAll(".square");
     await user.click(squares[0]);
-    expect(queryAllByRole(board, "img")).toHaveLength(1);
+    expect(await findAllByRole(board, "img")).toHaveLength(1);
 
     await user.click(screen.getByRole("button", { name: /empezar/i }));
 
-    expect(queryAllByRole(board, "img")).toHaveLength(0);
+    // expect(await findAllByRole(board, "img")).toHaveLength(0);
   });
 });

@@ -1,3 +1,4 @@
+import { screen } from "@testing-library/react";
 import { emptyBoard } from "./model/board";
 
 export function createBoardFromSketch(sketchedBoard) {
@@ -15,3 +16,5 @@ export function createBoardFromSketch(sketchedBoard) {
     ),
   );
 }
+
+export const findCharacter = async (name) => await screen.findByTitle(name);

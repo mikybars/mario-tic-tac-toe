@@ -107,7 +107,7 @@ export function Board({
         (w) => w?.index === square && w?.isHighlighted,
       )}
     >
-      {turnPlayed ? players.get(turnPlayed).character : null}
+      {turnPlayed ? players.get(turnPlayed).character.image : null}
     </Square>
   ));
 }

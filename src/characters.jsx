@@ -1,30 +1,35 @@
-import Mario from "./assets/mario.svg?react";
-import Koopa from "./assets/koopa.svg?react";
-import Bowser from "./assets/bowser.svg?react";
-import Toad from "./assets/toad.svg?react";
-import Goomba from "./assets/goomba.svg?react";
-import Racoon from "./assets/racoon.svg?react";
-import Star from "./assets/star.svg?react";
-import Pirana from "./assets/pirana.svg?react";
+import React, { Suspense } from "react";
+import { shuffled } from "./utils";
 
-const characters = {
-  Mario: <Mario title="Mario" />,
-  Koopa: <Koopa title="Koopa" />,
-  Bowser: <Bowser title="Bowser" />,
-  Toad: <Toad title="Toad" />,
-  Goomba: <Goomba title="Goomba" />,
-  Racoon: <Racoon title="Racoon" />,
-  Star: <Star title="Star" />,
-  Pirana: <Pirana title="Pirana" />,
-};
+const names = [
+  "Bowser",
+  "Goomba",
+  "Koopa",
+  "Mario",
+  "Pirana",
+  "Racoon",
+  "Star",
+  "Toad",
+];
 
-function generateDistinctRandomNumbers(n, bound) {
-  const numbers = new Set();
-  while (numbers.size < n) {
-    numbers.add(Math.floor(Math.random() * bound));
-  }
-  return Array.from(numbers);
-}
+const characters = Object.fromEntries(
+  names
+    .map((name) => [
+      name,
+      React.lazy(() => import(`./assets/${name.toLowerCase()}.svg?react`)),
+    ])
+    .map(([name, Character]) => [
+      name,
+      {
+        name,
+        image: (
+          <Suspense fallback={<div>Loading...</div>}>
+            <Character title={name} />
+          </Suspense>
+        ),
+      },
+    ]),
+);
 
 export default {
   ...characters,
@@ -32,9 +37,6 @@ export default {
   ALL: Object.values(characters),
 
   randomCharacters(count) {
-    const numberOfCharacters = Object.entries(characters).length;
-    return generateDistinctRandomNumbers(count, numberOfCharacters).map(
-      (i) => Object.entries(characters)[i],
-    );
+    return shuffled(this.ALL).slice(0, Math.min(count, this.ALL.length));
   },
 };

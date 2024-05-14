@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import characters from "../characters";
+import { findCharacter } from "../testUtils";
 import { GameOverModal } from "./GameOverModal";
 
 describe("<GameOverModal />", () => {
@@ -17,10 +18,10 @@ describe("<GameOverModal />", () => {
     user = userEvent.setup();
   });
 
-  test("displays the winner name and symbol", () => {
+  test("displays the winner name and symbol", async () => {
     render(<GameOverModal {...modal} />);
     screen.getByText(modal.winner.name, { exact: false });
-    screen.getByTitle("Goomba");
+    await findCharacter("Goomba");
   });
 
   test("reports draw", () => {
