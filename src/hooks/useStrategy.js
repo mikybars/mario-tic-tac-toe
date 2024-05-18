@@ -7,6 +7,8 @@ export function useStrategy({ cpuSymbol }) {
     storage.getObject('lastGameWasDraw') ?? false
   )
   const [minMovesToWin, setMinMovesToWin] = useState(() => {
+    if (!cpuSymbol) return
+
     const counters = storage.getObject('counters')
     return {
       [cpuSymbol]: new BoundedCounter(3, 5, counters?.[0]),
@@ -19,6 +21,8 @@ export function useStrategy({ cpuSymbol }) {
   }, [lastGameWasDraw])
 
   useEffect(() => {
+    if (!cpuSymbol) return
+
     storage.putObject('counters', [
       minMovesToWin[cpuSymbol].value,
       minMovesToWin[cpuSymbol?.other].value
