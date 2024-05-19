@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { useEffect, useState } from 'react'
+import { noop } from '../utils'
 
 export default function Player({
   allCharacters,
@@ -9,8 +10,8 @@ export default function Player({
   turn,
   hasTurn,
   isEditable,
-  onChangeCharacter,
-  onChangeName
+  onChangeCharacter = noop,
+  onChangeName = noop
 }) {
   const [character, setCharacter] = useState(initialCharacter)
   const [name, setName] = useState(initialName)

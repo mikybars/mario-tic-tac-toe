@@ -22,19 +22,6 @@ describe('Board model', () => {
     })
   })
 
-  describe('.isTaken', () => {
-    test('all squares in an empty board are not taken', () => {
-      const notTaken = (_, i) => !emptyBoard.isTaken(i)
-      expect([...emptyBoard].every(notTaken)).toBeTruthy()
-    })
-
-    test('a square is taken after played', () => {
-      expect(
-        emptyBoard.afterPlaying({ symbol: 'x', square: 0 }).isTaken(0)
-      ).toBeTruthy()
-    })
-  })
-
   describe('.emptySquaresExcluding', () => {
     test('an empty board has 9 empty squares', () => {
       expect(emptyBoard.emptySquaresExcluding()).toHaveLength(9)

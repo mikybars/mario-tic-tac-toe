@@ -4,7 +4,7 @@ import characters from '../characters'
 import { Player as PlayerModel } from '../model/player'
 import { TURN } from '../model/turn'
 import { Board } from './Board'
-import { findCharacter } from '../testUtils'
+import '@testing-library/jest-dom'
 
 describe('<Board 1-players />', () => {
   let user
@@ -24,7 +24,7 @@ describe('<Board 1-players />', () => {
     ])
   }
 
-  beforeEach(() => {
+  beforeEach(async() => {
     render(<Board {...onePlayerBoard} />)
     squares = document.querySelectorAll('.square')
 
@@ -35,16 +35,16 @@ describe('<Board 1-players />', () => {
     await user.click(squares[0])
     await user.click(squares[1])
 
-    expect(await screen.findAllByRole('img')).toHaveLength(1)
-    await findCharacter('Mario')
+    expect(screen.queryAllByRole('img')).toHaveLength(1)
+    expect(screen.getByTitle('Mario')).toBeInTheDocument()
   })
 
   test('player 2 plays after player 1', async() => {
     await user.click(squares[0])
 
     vi.waitFor(async() => {
-      expect(await screen.findAllByRole('img')).toHaveLength(2)
-      await findCharacter('Bowser')
+      expect(screen.queryAllByRole('img')).toHaveLength(2)
+      expect(screen.getByTitle('Bowser')).toBeInTheDocument()
     })
   })
 })

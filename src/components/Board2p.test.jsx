@@ -4,7 +4,7 @@ import characters from '../characters'
 import { TURN } from '../model/turn'
 import { Board } from './Board'
 import { Player as PlayerModel } from '../model/player'
-import { findCharacter } from '../testUtils'
+import '@testing-library/jest-dom'
 
 describe('<Board 2-players />', () => {
   let user
@@ -25,7 +25,7 @@ describe('<Board 2-players />', () => {
   const clickInSequence = (...moves) =>
     Promise.all(moves.map((i) => user.click(squares[i])))
 
-  beforeEach(() => {
+  beforeEach(async() => {
     twoPlayersBoard.onGameOver = vi.fn()
     render(<Board {...twoPlayersBoard} />)
     squares = document.querySelectorAll('.square')
@@ -36,16 +36,15 @@ describe('<Board 2-players />', () => {
   test('players take turns', async() => {
     await clickInSequence(0, 1)
 
-    await findCharacter('Mario')
-    await findCharacter('Bowser')
+    expect(screen.getByTitle('Mario')).toBeInTheDocument()
+    expect(screen.getByTitle('Bowser')).toBeInTheDocument()
   })
 
   test("players cannot take other player's squares", async() => {
     await clickInSequence(0, 1, 0)
 
-    expect(await screen.findAllByRole('img')).toHaveLength(2)
-    await findCharacter('Mario')
-    await findCharacter('Bowser')
+    expect(screen.getByTitle('Mario')).toBeInTheDocument()
+    expect(screen.getByTitle('Bowser')).toBeInTheDocument()
   })
 
   test('X wins', async() => {

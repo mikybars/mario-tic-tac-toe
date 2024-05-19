@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 import characters from '../characters'
-import { findCharacter } from '../testUtils'
 import { GameOverModal } from './GameOverModal'
+import '@testing-library/jest-dom'
 
 describe('<GameOverModal />', () => {
   let user
@@ -21,7 +21,7 @@ describe('<GameOverModal />', () => {
   test('displays the winner name and symbol', async() => {
     render(<GameOverModal {...modal} />)
     screen.getByText(modal.winner.name, { exact: false })
-    await findCharacter('Goomba')
+    expect(screen.getByTitle('Goomba')).toBeInTheDocument()
   })
 
   test('reports draw', () => {

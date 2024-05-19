@@ -1,6 +1,11 @@
 import clsx from 'clsx'
 
-export function Square({ children, play, index, isSelected, isWinner }) {
+export function Square({ children, take, index, isSelected, isWinner }) {
+  const play = () => {
+    const isNotTaken = children === null
+    if (isNotTaken) take(index)
+  }
+
   return (
     <div
       className={clsx(
@@ -8,7 +13,7 @@ export function Square({ children, play, index, isSelected, isWinner }) {
         isSelected && 'is-selected',
         isWinner && 'is-winner'
       )}
-      onClick={() => play(index)}
+      onClick={play}
     >
       {children}
     </div>

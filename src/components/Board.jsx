@@ -1,98 +1,110 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { emptyBoard } from '../model/board'
 import { useStrategy } from '../hooks/useStrategy'
 import { Square } from './Square'
+import { noop } from '../utils'
 
-function simulateThinking(action) {
-  setTimeout(action, 1000)
-}
+const simulateThinking = (action) => setTimeout(action, 1000)
+const cancelPlay = (playId) => clearTimeout(playId)
 
 export function Board({
   players,
   cpuTurn,
   initialTurn,
-  onChangeTurn,
-  onGameOver
+  onChangeTurn = noop,
+  onGameOver = noop
 }) {
   const [board, setBoard] = useState(emptyBoard())
   const [winnerCombo, setWinnerCombo] = useState()
+  const [gameIsOver, setGameIsOver] = useState(false)
   const turn = useRef(initialTurn)
   const [cpuMove, recalculateStrategy] = useStrategy({
     cpuSymbol: cpuTurn
   })
 
-  const playCpuTurn = () =>
-    simulateThinking(() => playTurn(cpuMove({ board })))
-
-  useEffect(() => {
-    notifyGameOver()
-    if (board.gameOver) return
-    if (!board.isEmpty()) changeTurn()
-    if (turn.current === cpuTurn) playCpuTurn()
-  }, [board])
-
-  useEffect(() => {
-    if (turn.current === cpuTurn) playCpuTurn()
-  }, [cpuTurn])
-
-  useEffect(() => {
-    if (winnerCombo) animateWinnerCombo()
-  }, [winnerCombo])
-
-  function changeTurn() {
+  const passTurn = useCallback(() => {
     turn.current = turn.current.other
+    onChangeTurn(turn.current)
+  }, [onChangeTurn])
 
-    if (typeof onChangeTurn === 'function') {
-      onChangeTurn(turn.current)
+  const playTurn = useCallback((square) => {
+    const currentTurn = turn.current
+    setBoard(board => board.afterPlaying({ symbol: currentTurn, square }))
+    passTurn()
+  }, [passTurn])
+
+  const playUserTurn = useCallback((square) => {
+    if (!board.gameOver && turn.current !== cpuTurn) {
+      playTurn(square)
     }
-  }
+  }, [board.gameOver, cpuTurn, playTurn])
 
-  function animateWinnerCombo() {
-    const firstNotHighlighted = winnerCombo.findIndex((w) => !w.isHighlighted)
-    setTimeout(() => {
-      if (firstNotHighlighted !== -1) {
+  const playCpuTurn = useCallback(() => {
+    if (!board.gameOver) {
+      return simulateThinking(() => playTurn(cpuMove({ board })))
+    }
+  }, [board, cpuMove, playTurn])
+
+  useEffect(() => {
+    let playId
+    if (turn.current === cpuTurn) playId = playCpuTurn()
+
+    return () => cancelPlay(playId)
+  }, [cpuTurn, playCpuTurn])
+
+  useEffect(() => {
+    if (board.gameOver?.draw) onGameOver(board.gameOver)
+  }, [board.gameOver, onGameOver])
+
+  useEffect(() => {
+    setWinnerCombo(board.gameOver?.winner?.combo.map((i) => ({ index: i })))
+  }, [board.gameOver])
+
+  useEffect(() => {
+    let timerId
+    if (winnerCombo?.some(square => !square.isHighlighted)) {
+      const firstNotHighlighted = winnerCombo.findIndex((w) => !w.isHighlighted)
+      timerId = setTimeout(() => {
         const newWinnerCombo = [...winnerCombo]
         newWinnerCombo[firstNotHighlighted].isHighlighted = true
         setWinnerCombo(newWinnerCombo)
-      } else {
-        gameOver()
+      }, 300)
+    }
+
+    return () => {
+      if (timerId) {
+        clearTimeout(timerId)
       }
-    }, 300)
-  }
-
-  function gameOver() {
-    onGameOver(board.gameOver)
-    recalculateStrategy(board.gameOver)
-  }
-
-  function playUserTurn(square) {
-    if (turn.current !== cpuTurn) {
-      playTurn(square)
     }
-  }
+  }, [winnerCombo])
 
-  function playTurn(square) {
-    if (board.gameOver || board.isTaken(square)) return
-    setBoard(board.afterPlaying({ symbol: turn.current, square }))
-  }
+  useEffect(() => {
+    let timerId
+    if (winnerCombo?.every(square => square.isHighlighted)) {
+      setTimeout(() => onGameOver(board.gameOver), 300)
+    }
 
-  function notifyGameOver() {
-    if (board.gameOver?.winner) {
-      const [a, b, c] = board.gameOver.winner.combo
-      setWinnerCombo([a, b, c].map((i) => ({ index: i })))
+    return () => {
+      if (timerId) {
+        return clearTimeout(timerId)
+      }
     }
-    if (board.gameOver?.draw) {
-      gameOver()
+  }, [winnerCombo, board.gameOver, onGameOver])
+
+  useEffect(() => {
+    if (board.gameOver && !gameIsOver) {
+      recalculateStrategy(board.gameOver)
+      setGameIsOver(true)
     }
-  }
+  }, [board.gameOver, gameIsOver, recalculateStrategy])
 
   return [...board].map((turnPlayed, square) => (
     <Square
       key={square}
       index={square}
-      play={playUserTurn}
+      take={playUserTurn}
       isWinner={winnerCombo?.some(
-        (w) => w?.index === square && w?.isHighlighted
+        ({ index, isHighlighted }) => index === square && isHighlighted
       )}
     >
       {turnPlayed ? players.get(turnPlayed).character.image : null}

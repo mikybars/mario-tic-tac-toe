@@ -8,6 +8,10 @@ export const storage = {
 
   putObject(key, o) {
     return window.localStorage.setItem(key, JSON.stringify(o))
+  },
+
+  deleteObject(key) {
+    window.localStorage.removeItem(key)
   }
 }
 

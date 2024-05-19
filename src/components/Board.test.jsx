@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 import characters from '../characters'
 import { Player as PlayerModel } from '../model/player'
@@ -6,7 +6,6 @@ import { TURN } from '../model/turn'
 import { Board } from './Board'
 
 describe('<Board />', () => {
-  let component
   let user
   let squares
   const board = {
@@ -23,26 +22,25 @@ describe('<Board />', () => {
       ]
     ])
   }
+  const clickInSequence = (...moves) =>
+    Promise.all(moves.map((i) => user.click(squares[i])))
 
   beforeEach(() => {
+    render(<Board {...board} />)
+    squares = document.querySelectorAll('.square')
+
     user = userEvent.setup()
-    component = render(<Board {...board} />)
-    squares = component.container.querySelectorAll('.square')
   })
 
   test('starts empty', () => {
-    expect(component.queryAllByRole('img')).toHaveLength(0)
+    expect(screen.queryAllByRole('img')).toHaveLength(0)
   })
 
   test('notify change turn', async() => {
-    await Promise.all([
-      user.click(squares[0]),
-      user.click(squares[4]),
-      user.click(squares[6])
-    ])
+    await clickInSequence(0, 4, 6)
 
-    expect(board.onChangeTurn).toHaveBeenCalledWith(TURN.O)
-    expect(board.onChangeTurn).toHaveBeenCalledWith(TURN.X)
-    expect(board.onChangeTurn).toHaveBeenCalledWith(TURN.O)
+    expect(board.onChangeTurn).nthCalledWith(1, TURN.O)
+    expect(board.onChangeTurn).nthCalledWith(2, TURN.X)
+    expect(board.onChangeTurn).nthCalledWith(3, TURN.O)
   })
 })

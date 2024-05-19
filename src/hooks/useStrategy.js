@@ -1,57 +1,49 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { BoundedCounter } from '../model/boundedCounter'
 import { noop, shuffled, storage } from '../utils'
 
+function calculateNextBestMove(board, candidateSquares, symbolToPlay) {
+  const shuffledCandidates = shuffled(candidateSquares)
+  return (
+    shuffledCandidates.find(
+      (candidate) =>
+        board
+          .afterPlaying({ symbol: symbolToPlay, square: candidate })
+          .allWinnerMovesBy(symbolToPlay).length > 0
+    ) ?? shuffledCandidates[0]
+  )
+}
+
 export function useStrategy({ cpuSymbol }) {
   const [lastGameWasDraw, setLastGameWasDraw] = useState(
-    storage.getObject('lastGameWasDraw') ?? false
+    storage.getObject('strategy.lastGameWasDraw') ?? false
   )
   const [minMovesToWin, setMinMovesToWin] = useState(() => {
-    if (!cpuSymbol) return
-
-    const counters = storage.getObject('counters')
-    return {
-      [cpuSymbol]: new BoundedCounter(3, 5, counters?.[0]),
-      [cpuSymbol?.other]: new BoundedCounter(3, 5, counters?.[1])
-    }
+    return (storage.getObject('strategy.minMovesToWin') ?? [3, 3])
+      .map(count => new BoundedCounter(3, 5, count))
   })
 
   useEffect(() => {
-    storage.putObject('lastGameWasDraw', lastGameWasDraw)
+    storage.putObject('strategy.lastGameWasDraw', lastGameWasDraw)
   }, [lastGameWasDraw])
 
   useEffect(() => {
-    if (!cpuSymbol) return
+    storage.putObject('strategy.minMovesToWin', minMovesToWin.map(count => count.value))
+  }, [minMovesToWin])
 
-    storage.putObject('counters', [
-      minMovesToWin[cpuSymbol].value,
-      minMovesToWin[cpuSymbol?.other].value
-    ])
-  }, [cpuSymbol, minMovesToWin])
+  const levelUp = useCallback(() =>
+    setMinMovesToWin(mmw => ([
+      mmw[0].dec(),
+      mmw[1].incIf(mmw[0].value === mmw[0].lowerBound)
+    ])), [])
 
-  function levelUp() {
-    const oldCpuMinMoves = minMovesToWin[cpuSymbol]
-    const newCpuMinMoves = oldCpuMinMoves.dec()
-    setMinMovesToWin({
-      [cpuSymbol]: newCpuMinMoves,
-      [cpuSymbol?.other]: minMovesToWin[cpuSymbol?.other].incIf(
-        newCpuMinMoves === oldCpuMinMoves
-      )
-    })
-  }
+  const levelDown = useCallback(() =>
+    setMinMovesToWin(mmw => ([
+      mmw[0].inc(),
+      mmw[1].decIf(mmw[0].value === mmw[0].upperBound)
+    ])), [])
 
-  function levelDown() {
-    const oldCpuMinMoves = minMovesToWin[cpuSymbol]
-    const newCpuMinMoves = oldCpuMinMoves.inc()
-    setMinMovesToWin({
-      [cpuSymbol]: newCpuMinMoves,
-      [cpuSymbol?.other]: minMovesToWin[cpuSymbol?.other].decIf(
-        newCpuMinMoves === oldCpuMinMoves
-      )
-    })
-  }
-
-  function recalculate(gameOver) {
+  const recalculate = useCallback((gameOver) => {
     if (gameOver.winner) {
       newStrategyOnWinner()
     } else {
@@ -61,9 +53,8 @@ export function useStrategy({ cpuSymbol }) {
 
     function newStrategyOnWinner() {
       const { symbol: winner, numberOfMoves } = gameOver.winner
-      const wasTooEasy = numberOfMoves <= minMovesToWin[winner].value
-      const cpuWonTooEasy = wasTooEasy && winner === cpuSymbol
-      const userWonTooEasy = wasTooEasy && winner === cpuSymbol?.other
+      const cpuWonTooEasy = numberOfMoves <= minMovesToWin[0].value && winner === cpuSymbol
+      const userWonTooEasy = numberOfMoves <= minMovesToWin[1].value && winner === cpuSymbol.other
       if (cpuWonTooEasy) {
         levelDown()
       } else if (userWonTooEasy) {
@@ -77,27 +68,15 @@ export function useStrategy({ cpuSymbol }) {
         levelDown()
       }
     }
-  }
+  }, [cpuSymbol, lastGameWasDraw, levelDown, levelUp, minMovesToWin])
 
-  function calculateNextBestMove(board, candidates) {
-    const shuffledCandidates = shuffled(candidates)
-    return (
-      shuffledCandidates.find(
-        (candidate) =>
-          board
-            .afterPlaying({ symbol: cpuSymbol, square: candidate })
-            .allWinnerMovesBy(cpuSymbol).length > 0
-      ) ?? shuffledCandidates[0]
-    )
-  }
-
-  function play({ board }) {
+  const play = useCallback(({ board }) => {
     if (board.gameOver) return
 
     const cpuCanWinIn = (numberOfMoves) =>
-      numberOfMoves >= minMovesToWin[cpuSymbol].value
+      numberOfMoves >= minMovesToWin[0].value
     const userCanNotWinIn = (numberOfMoves) =>
-      numberOfMoves < minMovesToWin[cpuSymbol?.other].value
+      numberOfMoves < minMovesToWin[1].value
 
     const winnerMoves = board.allWinnerMovesBy(cpuSymbol)
     if (
@@ -117,12 +96,13 @@ export function useStrategy({ cpuSymbol }) {
 
     const nextMove = calculateNextBestMove(
       board,
-      board.emptySquaresExcluding(...winnerMoves, ...blockingMoves)
+      board.emptySquaresExcluding(...winnerMoves, ...blockingMoves),
+      cpuSymbol
     )
     return nextMove !== undefined
       ? nextMove
       : [...blockingMoves, ...winnerMoves].find((first) => first !== undefined)
-  }
+  }, [cpuSymbol, minMovesToWin])
 
   return cpuSymbol ? [play, recalculate] : [noop, noop]
 }

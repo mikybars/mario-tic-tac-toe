@@ -76,15 +76,6 @@ export class Board {
   }
 
   /**
-   * Determines if a specific square is occupied.
-   * @param   square - The index of the square to check.
-   * @returns True if the square is taken, false otherwise.
-   */
-  isTaken(square) {
-    return this.squares[square] !== EMPTY
-  }
-
-  /**
    * Returns indices of empty squares excluding specified indices.
    * @param   squares - Indices to exclude from the check.
    * @returns A list of indices that are empty and not excluded.
