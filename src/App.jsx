@@ -1,6 +1,7 @@
 import confetti from 'canvas-confetti'
 import clsx from 'clsx'
 import { useCallback, useEffect, useRef, useState } from 'react'
+
 import './App.css'
 import logo from './assets/logo.png'
 import Characters from './characters'

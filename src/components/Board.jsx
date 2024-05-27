@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { emptyBoard } from '../model/board'
-import { useStrategy } from '../hooks/useStrategy'
+
 import { Square } from './Square'
+import { useStrategy } from '../hooks/useStrategy'
+import { emptyBoard } from '../model/board'
 import { noop } from '../utils'
 
 const simulateThinking = (action) => setTimeout(action, 1000)

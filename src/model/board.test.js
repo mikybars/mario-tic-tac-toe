@@ -1,6 +1,7 @@
-import { createBoardFromSketch } from '../testUtils'
-import { emptyBoard as emptyBoardFactory } from './board'
 import each from 'jest-each'
+
+import { emptyBoard as emptyBoardFactory } from './board'
+import { createBoardFromSketch } from '../testUtils'
 
 describe('Board model', () => {
   const emptyBoard = emptyBoardFactory()

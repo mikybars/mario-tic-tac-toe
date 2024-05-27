@@ -1,6 +1,7 @@
+import { findAllByRole, findByRole } from '@testing-library/dom'
 import { render, screen } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
-import { findAllByRole, findByRole } from '@testing-library/dom'
+
 import { App } from './App'
 
 describe('<App />', () => {

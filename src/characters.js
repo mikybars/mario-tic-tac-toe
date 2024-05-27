@@ -1,14 +1,14 @@
-import { shuffled } from './utils'
-
-import Bowser from './assets/bowser.svg?react'
-import Goomba from './assets/goomba.svg?react'
-import Koopa from './assets/koopa.svg?react'
-import Mario from './assets/mario.svg?react'
-import Pirana from './assets/pirana.svg?react'
-import Racoon from './assets/racoon.svg?react'
-import Star from './assets/star.svg?react'
-import Toad from './assets/toad.svg?react'
 import React from 'react'
+
+import Bowser from './assets/bowser.svg'
+import Goomba from './assets/goomba.svg'
+import Koopa from './assets/koopa.svg'
+import Mario from './assets/mario.svg'
+import Pirana from './assets/pirana.svg'
+import Racoon from './assets/racoon.svg'
+import Star from './assets/star.svg'
+import Toad from './assets/toad.svg'
+import { shuffled } from './utils'
 
 const imageComponents = { Mario, Bowser, Goomba, Koopa, Pirana, Racoon, Star, Toad }
 

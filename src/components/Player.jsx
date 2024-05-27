@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { useEffect, useState } from 'react'
+
 import { noop } from '../utils'
 
 export default function Player({

@@ -1,9 +1,10 @@
 import { render, screen } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
+
+import { Board } from './Board'
 import characters from '../characters'
 import { Player as PlayerModel } from '../model/player'
 import { TURN } from '../model/turn'
-import { Board } from './Board'
 import '@testing-library/jest-dom'
 
 describe('<Board 1-players />', () => {

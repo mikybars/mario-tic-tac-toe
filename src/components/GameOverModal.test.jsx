@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
-import characters from '../characters'
+
 import { GameOverModal } from './GameOverModal'
+import characters from '../characters'
 import '@testing-library/jest-dom'
 
 describe('<GameOverModal />', () => {
