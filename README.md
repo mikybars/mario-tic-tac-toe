@@ -1,10 +1,18 @@
-# Showcase
+<img src="public/mario.ico" width="100">
 
-- React
-- React hooks: `useState` and `useEffect`
-- Custom hooks: `useStrategy`
-- Local storage
-- [Testing library](https://testing-library.com/)
-- Parameterized testing with [jest-each](https://www.npmjs.com/package/jest-each)
+# Mario Tic Tac Toe
 
-https://youtu.be/qkzcjwnueLA?si=DFFQOze0Zynal3vc
+Toy project of a backend engineer pretending to be a frontender for a while 🎭
+
+Had lots of fun while learning some things along the way: 
+
+- [x] React + Vite
+- [x] React hooks: `useState`, `useEffect` and `useCallback`
+- [x] Custom hook `useStrategy`
+- [x] Local storage
+- [x] Testing with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
+- [x] Linting with eslint + [Standard JS](https://standardjs.com/) + [husky](https://typicode.github.io/husky/) + [lint-staged](https://www.npmjs.com/package/lint-staged)
+
+## Acknowledgments
+
+Big shout-out to [@midudev](https://github.com/midudev) 📣 for his fantastic [free online courses on React](https://www.youtube.com/watch?v=qkzcjwnueLA) and the rest of the JS ecosystem.
