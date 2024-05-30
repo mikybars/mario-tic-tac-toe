@@ -16,4 +16,8 @@
   &.is-winner {
     background: var(--highlight-color4);
   }
+
+  &.is-greyed {
+    filter: grayscale(1);
+  }
 }

@@ -8,6 +8,14 @@ import { noop } from '../utils'
 const simulateThinking = (action) => setTimeout(action, 1000)
 const cancelPlay = (playId) => clearTimeout(playId)
 
+const clearTimeoutFn = (timerId) => {
+  return () => {
+    if (timerId) {
+      clearTimeout(timerId)
+    }
+  }
+}
+
 export function Board({
   players,
   cpuTurn,
@@ -54,7 +62,12 @@ export function Board({
   }, [cpuTurn, playCpuTurn])
 
   useEffect(() => {
-    if (board.gameOver?.draw) onGameOver(board.gameOver)
+    let timerId
+    if (board.gameOver?.draw) {
+      timerId = setTimeout(() => onGameOver(board.gameOver), 500)
+    }
+
+    return clearTimeoutFn(timerId)
   }, [board.gameOver, onGameOver])
 
   useEffect(() => {
@@ -72,11 +85,7 @@ export function Board({
       }, 300)
     }
 
-    return () => {
-      if (timerId) {
-        clearTimeout(timerId)
-      }
-    }
+    return clearTimeoutFn(timerId)
   }, [winnerCombo])
 
   useEffect(() => {
@@ -85,11 +94,7 @@ export function Board({
       setTimeout(() => onGameOver(board.gameOver), 300)
     }
 
-    return () => {
-      if (timerId) {
-        return clearTimeout(timerId)
-      }
-    }
+    return clearTimeoutFn(timerId)
   }, [winnerCombo, board.gameOver, onGameOver])
 
   useEffect(() => {
@@ -104,6 +109,7 @@ export function Board({
       key={square}
       index={square}
       take={playUserTurn}
+      isGreyed={board.gameOver?.draw}
       isWinner={winnerCombo?.some(
         ({ index, isHighlighted }) => index === square && isHighlighted
       )}
